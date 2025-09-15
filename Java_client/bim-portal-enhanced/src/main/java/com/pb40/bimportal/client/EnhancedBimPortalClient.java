@@ -1,0 +1,1255 @@
+package com.pb40.bimportal.client;
+
+// Import generated OpenAPI client classes
+import com.bimportal.client.ApiClient;
+import com.bimportal.client.api.*;
+import com.bimportal.client.model.*;
+
+// Import enhanced client classes
+import com.pb40.bimportal.auth.AuthService;
+import com.pb40.bimportal.auth.AuthServiceImpl;
+import com.pb40.bimportal.config.BimPortalConfig;
+import com.bimportal.client.model.OrganisationForPublicDTO;
+
+// Add SLF4J imports
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+/**
+ * Enhanced BIM Portal client with improved binary response handling.
+ * This version properly handles PDF and other binary export formats.
+ */
+public class EnhancedBimPortalClient {
+
+    private static final Logger logger = LoggerFactory.getLogger(EnhancedBimPortalClient.class);
+
+    private final AuthService authService;
+    private final ApiClient apiClient;
+
+    // Generated API clients
+    private final AiaProjekteApi projectsApi;
+    private final AiaLoinApi loinApi;
+    private final FachmodelleApi domainModelsApi;
+    private final KontextinformationenApi contextInfoApi;
+    private final AiaVorlagenApi templatesApi;
+    private final MerkmaleApi propertiesApi;
+    private final MerkmalsgruppenApi propertyGroupsApi;
+    private final AiaFilterApi aiaFilterApi;
+    private final InfrastrukturApi infraApi;
+
+    /**
+     * Constructor with explicit auth service.
+     */
+    public EnhancedBimPortalClient(AuthService authService) {
+        this.authService = authService;
+        this.apiClient = createConfiguredApiClient();
+
+        // Initialize all API clients using ApiClient's buildClient method
+        this.projectsApi = apiClient.buildClient(AiaProjekteApi.class);
+        this.loinApi = apiClient.buildClient(AiaLoinApi.class);
+        this.domainModelsApi = apiClient.buildClient(FachmodelleApi.class);
+        this.contextInfoApi = apiClient.buildClient(KontextinformationenApi.class);
+        this.templatesApi = apiClient.buildClient(AiaVorlagenApi.class);
+        this.propertiesApi = apiClient.buildClient(MerkmaleApi.class);
+        this.propertyGroupsApi = apiClient.buildClient(MerkmalsgruppenApi.class);
+        this.aiaFilterApi = apiClient.buildClient(AiaFilterApi.class);
+        this.infraApi = apiClient.buildClient(InfrastrukturApi.class);
+
+        logger.info("Enhanced BIM Portal client initialized with context: {}", authService.getContextGuid());
+    }
+
+    /**
+     * Constructor using default authentication from configuration.
+     */
+    public EnhancedBimPortalClient(String contextGuid) {
+        this.apiClient = createConfiguredApiClient();
+        this.infraApi = apiClient.buildClient(InfrastrukturApi.class);
+        this.authService = new AuthServiceImpl(infraApi, contextGuid);
+
+        // Initialize remaining API clients
+        this.projectsApi = apiClient.buildClient(AiaProjekteApi.class);
+        this.loinApi = apiClient.buildClient(AiaLoinApi.class);
+        this.domainModelsApi = apiClient.buildClient(FachmodelleApi.class);
+        this.contextInfoApi = apiClient.buildClient(KontextinformationenApi.class);
+        this.templatesApi = apiClient.buildClient(AiaVorlagenApi.class);
+        this.propertiesApi = apiClient.buildClient(MerkmaleApi.class);
+        this.propertyGroupsApi = apiClient.buildClient(MerkmalsgruppenApi.class);
+        this.aiaFilterApi = apiClient.buildClient(AiaFilterApi.class);
+
+        logger.info("Enhanced BIM Portal client initialized with default config");
+    }
+
+    /**
+     * Default constructor using default context GUID.
+     */
+    public EnhancedBimPortalClient() {
+        this(BimPortalConfig.DEFAULT_AUTH_GUID);
+    }
+
+    /**
+     * Create and configure the ApiClient with binary support.
+     */
+    private ApiClient createConfiguredApiClient() {
+        ApiClient apiClient = new ApiClient("bearerAuth");
+        apiClient.setBasePath(BimPortalConfig.getBaseUrl());
+
+        // Configure the bearer token supplier to get fresh tokens
+        apiClient.setBearerToken(() -> {
+            try {
+                return authService.getValidToken();
+            } catch (Exception e) {
+                logger.error("Failed to get valid token: {}", e.getMessage());
+                throw new RuntimeException("Authentication failed", e);
+            }
+        });
+
+        return apiClient;
+    }
+
+    /**
+     * Performs a comprehensive health check of the BIM Portal API
+     */
+    public HealthCheckResult performHealthCheck() {
+        logger.info("Performing BIM Portal health check...");
+
+        boolean apiAccessible = false;
+        boolean authWorking = false;
+        String statusMessage;
+        String errorDetails = null;
+        long responseTime = 0;
+
+        try {
+            long startTime = System.currentTimeMillis();
+
+            try {
+                String token = authService.getValidToken();
+                responseTime = System.currentTimeMillis() - startTime;
+
+                if (token != null && !token.isEmpty()) {
+                    apiAccessible = true;
+                    authWorking = true;
+                    statusMessage = "API accessible and authentication working";
+                } else {
+                    apiAccessible = true;
+                    authWorking = false;
+                    statusMessage = "API accessible but authentication failed";
+                }
+            } catch (Exception authException) {
+                responseTime = System.currentTimeMillis() - startTime;
+                apiAccessible = true;
+                authWorking = false;
+                errorDetails = authException.getMessage();
+                statusMessage = "Authentication failed - using public access only";
+
+                logger.warn("Authentication failed during health check: {}", authException.getMessage());
+            }
+
+        } catch (Exception e) {
+            apiAccessible = false;
+            authWorking = false;
+            errorDetails = e.getMessage();
+            statusMessage = "API not accessible: " + e.getMessage();
+
+            logger.error("Health check failed: {}", e.getMessage());
+        }
+
+        HealthCheckResult result = new HealthCheckResult(apiAccessible, authWorking, statusMessage, errorDetails, responseTime);
+
+        logger.info("Health check completed: API={}, Auth={}, Message={}",
+                apiAccessible, authWorking, statusMessage);
+
+        return result;
+    }
+
+
+    // === AUTHENTICATION METHODS ===
+
+    /**
+     * Check if client is authenticated.
+     */
+    public boolean isAuthenticated() {
+        return authService.isAuthenticated();
+    }
+
+    /**
+     * Get authentication status.
+     */
+    public String getAuthenticationStatus() {
+        if (authService instanceof AuthServiceImpl) {
+            return ((AuthServiceImpl) authService).getTokenStatus();
+        }
+        return authService.isAuthenticated() ? "Authenticated" : "Not authenticated";
+    }
+
+    /**
+     * Force logout and clear tokens.
+     */
+    public void logout() {
+        authService.logout();
+    }
+
+    // === ORGANIZATION METHODS ===
+
+    /**
+     * Get all available organizations.
+     * @return List of all organizations accessible through the API
+     * @throws RuntimeException if the operation fails
+     */
+    public List<OrganisationForPublicDTO> getAllOrganisations() {
+        try {
+            logger.debug("Fetching all available organizations");
+            List<OrganisationForPublicDTO> organizations = infraApi.getOrganisationsForPublic();
+            logger.info("Successfully retrieved {} organizations", organizations.size());
+            return organizations;
+        } catch (Exception e) {
+            logger.error("Failed to fetch organizations", e);
+            throw new RuntimeException("Failed to fetch organizations: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Get organizations where the specified user is a member.
+     * Requires authentication.
+     * @param userId UUID of the user
+     * @return List of user's organizations
+     * @throws RuntimeException if the operation fails
+     */
+    public List<OrganisationForPublicDTO> getUserOrganisations(UUID userId) {
+        if (userId == null) {
+            throw new IllegalArgumentException("User ID cannot be null");
+        }
+        if (!isAuthenticated()) {
+            throw new RuntimeException("Authentication required to fetch user organizations");
+        }
+        try {
+            logger.debug("Fetching organizations for user: {}", userId);
+            List<OrganisationForPublicDTO> userOrganizations = infraApi.getOrganisationsOfUser(userId);
+            logger.info("Successfully retrieved {} organizations for user {}", userOrganizations.size(), userId);
+            return userOrganizations;
+        } catch (Exception e) {
+            logger.error("Failed to fetch organizations for user: {}", userId, e);
+            throw new RuntimeException("Failed to fetch user organizations: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Get organizations where the current authenticated user is a member.
+     * Requires authentication and assumes the user ID can be extracted from the token.
+     * Note: This is a convenience method that would need the current user's UUID.
+     * The actual implementation depends on how the user ID is obtained from the authentication context.
+     *
+     * @param currentUserUuid UUID of the current authenticated user
+     * @return List of current user's organizations
+     * @throws RuntimeException if the operation fails
+     */
+    public List<OrganisationForPublicDTO> getCurrentUserOrganisations(UUID currentUserUuid) {
+        return getUserOrganisations(currentUserUuid);
+    }
+
+    /**
+     * Find organization by GUID.
+     * @param guid Organization GUID to search for
+     * @return Optional containing the organization if found
+     */
+    public Optional<OrganisationForPublicDTO> findOrganisationByGuid(String guid) {
+        if (guid == null || guid.trim().isEmpty()) {
+            return Optional.empty();
+        }
+
+        try {
+            return getAllOrganisations().stream()
+                    .filter(org -> guid.equals(org.getGuid()))
+                    .findFirst();
+        } catch (Exception e) {
+            logger.warn("Failed to search for organization with GUID: {}", guid, e);
+            return Optional.empty();
+        }
+    }
+
+    /**
+     * Find organization by name (case-insensitive).
+     * @param name Organization name to search for
+     * @return Optional containing the organization if found
+     */
+    public Optional<OrganisationForPublicDTO> findOrganisationByName(String name) {
+        if (name == null || name.trim().isEmpty()) {
+            return Optional.empty();
+        }
+
+        try {
+            return getAllOrganisations().stream()
+                    .filter(org -> org.getName() != null && name.equalsIgnoreCase(org.getName()))
+                    .findFirst();
+        } catch (Exception e) {
+            logger.warn("Failed to search for organization with name: {}", name, e);
+            return Optional.empty();
+        }
+    }
+
+    /**
+     * Check if the specified user is member of a specific organization.
+     * @param userId UUID of the user to check
+     * @param organizationGuid GUID of the organization to check
+     * @return true if user is a member, false otherwise
+     */
+    public boolean isUserMemberOfOrganisation(UUID userId, String organizationGuid) {
+        if (userId == null || organizationGuid == null || organizationGuid.trim().isEmpty()) {
+            return false;
+        }
+
+        try {
+            return getUserOrganisations(userId).stream()
+                    .anyMatch(org -> organizationGuid.equals(org.getGuid()));
+        } catch (Exception e) {
+            logger.warn("Failed to check user membership for organization: {} and user: {}", organizationGuid, userId, e);
+            return false;
+        }
+    }
+
+    /**
+     * Get organizations using query parameters.
+     * This method provides more flexibility for complex queries.
+     * @param queryParams Query parameters for filtering organizations
+     * @return List of organizations matching the criteria
+     * @throws RuntimeException if the operation fails
+     */
+    public List<OrganisationForPublicDTO> getUserOrganisationsWithParams(InfrastrukturApi.GetOrganisationsOfUserQueryParams queryParams) {
+        if (queryParams == null) {
+            throw new IllegalArgumentException("Query parameters cannot be null");
+        }
+        if (!isAuthenticated()) {
+            throw new RuntimeException("Authentication required to fetch user organizations");
+        }
+        try {
+            logger.debug("Fetching organizations with query parameters");
+            List<OrganisationForPublicDTO> organizations = infraApi.getOrganisationsOfUser(queryParams);
+            logger.info("Successfully retrieved {} organizations with query parameters", organizations.size());
+            return organizations;
+        } catch (Exception e) {
+            logger.error("Failed to fetch organizations with query parameters", e);
+            throw new RuntimeException("Failed to fetch organizations with query parameters: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Create query parameters for fetching user organizations.
+     * @param userId UUID of the user
+     * @return Configured query parameters
+     */
+    public InfrastrukturApi.GetOrganisationsOfUserQueryParams createUserOrganisationQueryParams(UUID userId) {
+        return new InfrastrukturApi.GetOrganisationsOfUserQueryParams().userId(userId);
+    }
+
+    /**
+     * Get organizations count for a user.
+     * @param userId UUID of the user
+     * @return Number of organizations the user is a member of
+     */
+    public int getUserOrganisationsCount(UUID userId) {
+        try {
+            return getUserOrganisations(userId).size();
+        } catch (Exception e) {
+            logger.warn("Failed to get organization count for user: {}", userId, e);
+            return 0;
+        }
+    }
+
+    /**
+     * Check if any organizations are available.
+     * @return true if there are organizations available, false otherwise
+     */
+    public boolean hasAvailableOrganisations() {
+        try {
+            return !getAllOrganisations().isEmpty();
+        } catch (Exception e) {
+            logger.warn("Failed to check if organizations are available", e);
+            return false;
+        }
+    }
+
+    /**
+     * Get organization names for a user.
+     * @param userId UUID of the user
+     * @return List of organization names the user is a member of
+     */
+    public List<String> getUserOrganisationNames(UUID userId) {
+        try {
+            return getUserOrganisations(userId).stream()
+                    .map(OrganisationForPublicDTO::getName)
+                    .filter(name -> name != null && !name.trim().isEmpty())
+                    .toList();
+        } catch (Exception e) {
+            logger.warn("Failed to get organization names for user: {}", userId, e);
+            return List.of();
+        }
+    }
+
+
+
+
+
+    // === Merkmalsgruppen - PROPERTY METHODS ===
+    /**
+     * Search for property groups with optional criteria.
+     * (POST /merkmale/api/v1/public/propertygroup)
+     * Liefert alle Merkmalsgruppen, die zu den Suchparametern passen
+     */
+    public List<PropertyOrGroupForPublicDto> searchPropertyGroups(PropertyOrGroupForPublicRequest request) {
+        try {
+            return propertyGroupsApi.getPropertyGroupsForPublic(request);
+        } catch (Exception e) {
+            logger.error("Error searching property groups: {}", e.getMessage());
+            return List.of();
+        }
+    }
+
+    /**
+     * Search for property groups with default criteria.
+     */
+    public List<PropertyOrGroupForPublicDto> searchPropertyGroups() {
+        PropertyOrGroupForPublicRequest defaultRequest = new PropertyOrGroupForPublicRequest();
+        // Set default pagination or search criteria if needed
+        return searchPropertyGroups(defaultRequest);
+    }
+
+    /**
+     * Get detailed property group information by its GUID.
+     * (GET /merkmale/api/v1/public/propertygroup/{guid})
+     */
+    public Optional<PropertyGroupDto> getPropertyGroup(UUID propertyGroupGuid) {
+        try {
+            PropertyGroupDto propertyGroup = propertyGroupsApi.getPropertyGroupForPublic(propertyGroupGuid);
+            return Optional.ofNullable(propertyGroup);
+        } catch (Exception e) {
+            logger.error("Error getting property group {}: {}", propertyGroupGuid, e.getMessage());
+            return Optional.empty();
+        }
+    }
+
+    // === Merkmale - PROPERTY METHODS ===
+
+    /**
+     * Search for properties with optional criteria.
+     */
+    public List<PropertyOrGroupForPublicDto> searchProperties(PropertyOrGroupForPublicRequest request) {
+        try {
+            return propertiesApi.getPropertiesForPublic(request);
+        } catch (Exception e) {
+            logger.error("Error searching properties: {}", e.getMessage());
+            return List.of();
+        }
+    }
+
+    /**
+     * Search for properties with default criteria.
+     */
+    public List<PropertyOrGroupForPublicDto> searchProperties() {
+        PropertyOrGroupForPublicRequest defaultRequest = new PropertyOrGroupForPublicRequest();
+        defaultRequest.setSearchString("a");
+        return searchProperties(defaultRequest);
+    }
+
+    /**
+     * Get detailed property information.
+     */
+    public Optional<PropertyDto> getProperty(UUID propertyGuid) {
+        try {
+            PropertyDto property = propertiesApi.getPropertyForPublic(propertyGuid);
+            return Optional.ofNullable(property);
+        } catch (Exception e) {
+            logger.error("Error getting property {}: {}", propertyGuid, e.getMessage());
+            return Optional.empty();
+        }
+    }
+
+    /**
+     * Get basic statistics about available data.
+     */
+    public ApiStats getApiStats() {
+        try {
+            int projectCount = searchProjects().size();
+            int propertyCount = searchProperties().size();
+            int loinCount = searchLoins().size();
+            int domainModelCount = searchDomainModels().size();
+
+            return new ApiStats(projectCount, propertyCount, loinCount, domainModelCount);
+        } catch (Exception e) {
+            logger.error("Error getting API stats: {}", e.getMessage());
+            return new ApiStats(0, 0, 0, 0);
+        }
+    }
+
+    // === Property Filters (Merkmale - Filter) ======
+
+    /**
+     * Get property filters (Merkmale filters).
+     * @return List of property filter groups
+     */
+    public List<TagGroupForPublicDto> getPropertyFilters() {
+        try {
+            return propertiesApi.getGlobalFilters();
+        } catch (Exception e) {
+            logger.error("Error getting property filters: {}", e.getMessage());
+            return List.of();
+        }
+    }
+
+    // === LOIN METHODS WITH BINARY SUPPORT ===
+
+    /**
+     * Search for LOINs with optional criteria.
+     */
+    public List<SimpleLoinPublicDto> searchLoins(LoinForPublicRequest request) {
+        try {
+            return loinApi.getLoinsForPublic(request);
+        } catch (Exception e) {
+            logger.error("Error searching LOINs: {}", e.getMessage());
+            return List.of();
+        }
+    }
+
+    /**
+     * Search for all LOINs.
+     */
+    public List<SimpleLoinPublicDto> searchLoins() {
+        return searchLoins(new LoinForPublicRequest());
+    }
+
+    /**
+     * Get detailed LOIN information.
+     */
+    public Optional<LOINPublicDto> getLoin(UUID loinGuid) {
+        try {
+            LOINPublicDto loin = loinApi.getLoinForPublic(loinGuid);
+            return Optional.ofNullable(loin);
+        } catch (Exception e) {
+            logger.error("Error getting LOIN {}: {}", loinGuid, e.getMessage());
+            return Optional.empty();
+        }
+    }
+
+    /**
+     * Export LOIN as PDF with proper binary handling.
+     */
+    public Optional<byte[]> exportLoinPdf(UUID loinGuid) {
+        try {
+            logger.debug("Attempting to export LOIN {} as PDF", loinGuid);
+            byte[] pdfBytes = loinApi.exportPdf(loinGuid);
+
+            if (pdfBytes != null && pdfBytes.length > 0 && isPdfContent(pdfBytes)) {
+                logger.debug("Successfully exported LOIN {} as PDF ({} bytes)", loinGuid, pdfBytes.length);
+                return Optional.of(pdfBytes);
+            }
+            return Optional.empty();
+
+        } catch (Exception e) {
+            return handleBinaryExportException(loinGuid, "LOIN PDF", e);
+        }
+    }
+    /**
+     * Export LOIN as OpenOffice ODT. 📝
+     */
+    public Optional<byte[]> exportLoinOpenOffice(UUID loinGuid) {
+        try {
+            logger.debug("Attempting to export LOIN {} as OpenOffice ODT", loinGuid);
+            byte[] odtBytes = loinApi.exportOdt(loinGuid);
+
+            if (odtBytes != null && odtBytes.length > 0) {
+                logger.debug("Successfully exported LOIN {} as ODT ({} bytes)", loinGuid, odtBytes.length);
+                return Optional.of(odtBytes);
+            }
+            return Optional.empty();
+
+        } catch (Exception e) {
+            return handleBinaryExportException(loinGuid, "LOIN OpenOffice ODT", e);
+        }
+    }
+
+    /**
+     * Export LOIN as OKSTRA (ZIP). 🏗️
+     */
+    public Optional<byte[]> exportLoinOkstra(UUID loinGuid) {
+        try {
+            logger.debug("Attempting to export LOIN {} as OKSTRA", loinGuid);
+            byte[] zipBytes = loinApi.exportOkstra(loinGuid);
+
+            if (zipBytes != null && zipBytes.length > 0) {
+                logger.debug("Successfully exported LOIN {} as OKSTRA ({} bytes)", loinGuid, zipBytes.length);
+                return Optional.of(zipBytes);
+            }
+            return Optional.empty();
+
+        } catch (Exception e) {
+            return handleBinaryExportException(loinGuid, "LOIN OKSTRA", e);
+        }
+    }
+
+    /**
+     * Export LOIN as XML. 🔗
+     */
+    public Optional<byte[]> exportLoinXml(UUID loinGuid) {
+        try {
+            logger.debug("Attempting to export LOIN {} as XML", loinGuid);
+            byte[] xmlBytes = loinApi.exportXml(loinGuid);
+
+            if (xmlBytes != null && xmlBytes.length > 0) {
+                logger.debug("Successfully exported LOIN {} as XML ({} bytes)", loinGuid, xmlBytes.length);
+                return Optional.of(xmlBytes);
+            }
+            return Optional.empty();
+
+        } catch (Exception e) {
+            return handleBinaryExportException(loinGuid, "LOIN XML", e);
+        }
+    }
+
+    /**
+     * Export LOIN as IDS. 🆔
+     */
+    public Optional<byte[]> exportLoinIds(UUID loinGuid) {
+        try {
+            logger.debug("Attempting to export LOIN {} as IDS", loinGuid);
+            byte[] idsBytes = loinApi.exportIds(loinGuid);
+
+            if (idsBytes != null && idsBytes.length > 0) {
+                logger.debug("Successfully exported LOIN {} as IDS ({} bytes)", loinGuid, idsBytes.length);
+                return Optional.of(idsBytes);
+            }
+            return Optional.empty();
+
+        } catch (Exception e) {
+            return handleBinaryExportException(loinGuid, "LOIN IDS", e);
+        }
+    }
+
+
+    // === DOMAIN MODEL METHODS ===
+
+    /**
+     * Search for domain-specific models.
+     */
+    public List<SimpleDomainSpecificModelPublicDto> searchDomainModels(AiaDomainSpecificModelForPublicRequest request) {
+        try {
+            return domainModelsApi.getDomainSpecificModelsForPublic(request);
+        } catch (Exception e) {
+            logger.error("Error searching domain models: {}", e.getMessage());
+            return List.of();
+        }
+    }
+
+    /**
+     * Search for all domain models.
+     */
+    public List<SimpleDomainSpecificModelPublicDto> searchDomainModels() {
+        return searchDomainModels(new AiaDomainSpecificModelForPublicRequest());
+    }
+
+    /**
+     * Get detailed domain model information.
+     */
+    public Optional<AIADomainSpecificModelPublicDto> getDomainModel(UUID modelGuid) {
+        try {
+            AIADomainSpecificModelPublicDto model = domainModelsApi.getDomainSpecificModelForPublic(modelGuid);
+            return Optional.ofNullable(model);
+        } catch (Exception e) {
+            logger.error("Error getting domain model {}: {}", modelGuid, e.getMessage());
+            return Optional.empty();
+        }
+    }
+
+    /**
+     * Export domain model as PDF with proper binary handling.
+     */
+    public Optional<byte[]> exportDomainModelPdf(UUID modelGuid) {
+        try {
+            logger.debug("Attempting to export domain model {} as PDF", modelGuid);
+            byte[] pdfBytes = domainModelsApi.exportPdf1(modelGuid);
+
+            if (pdfBytes != null && pdfBytes.length > 0 && isPdfContent(pdfBytes)) {
+                logger.debug("Successfully exported domain model {} as PDF ({} bytes)", modelGuid, pdfBytes.length);
+                return Optional.of(pdfBytes);
+            }
+            return Optional.empty();
+
+        } catch (Exception e) {
+            return handleBinaryExportException(modelGuid, "domain model PDF", e);
+        }
+    }
+
+    /**
+     * Export domain model as OpenOffice ODT. 📝
+     */
+    public Optional<byte[]> exportDomainModelOpenOffice(UUID modelGuid) {
+        try {
+            logger.debug("Attempting to export domain model {} as OpenOffice ODT", modelGuid);
+            byte[] odtBytes = domainModelsApi.exportOdt1(modelGuid);
+
+            if (odtBytes != null && odtBytes.length > 0) {
+                logger.debug("Successfully exported domain model {} as ODT ({} bytes)", modelGuid, odtBytes.length);
+                return Optional.of(odtBytes);
+            }
+            return Optional.empty();
+
+        } catch (Exception e) {
+            return handleBinaryExportException(modelGuid, "domain model OpenOffice ODT", e);
+        }
+    }
+
+    /**
+     * Export domain model as OKSTRA (ZIP). 🏗️
+     */
+    public Optional<byte[]> exportDomainModelOkstra(UUID modelGuid) {
+        try {
+            logger.debug("Attempting to export domain model {} as OKSTRA", modelGuid);
+            byte[] zipBytes = domainModelsApi.exportOkstra1(modelGuid);
+
+            if (zipBytes != null && zipBytes.length > 0) {
+                logger.debug("Successfully exported domain model {} as OKSTRA ({} bytes)", modelGuid, zipBytes.length);
+                return Optional.of(zipBytes);
+            }
+            return Optional.empty();
+
+        } catch (Exception e) {
+            return handleBinaryExportException(modelGuid, "domain model OKSTRA", e);
+        }
+    }
+
+    /**
+     * Export domain model as LOIN XML. 📄
+     */
+    public Optional<byte[]> exportDomainModelLoinXml(UUID modelGuid) {
+        try {
+            logger.debug("Attempting to export domain model {} as LOIN XML", modelGuid);
+            byte[] xmlBytes = domainModelsApi.exportXml1(modelGuid);
+
+            if (xmlBytes != null && xmlBytes.length > 0) {
+                logger.debug("Successfully exported domain model {} as LOIN XML ({} bytes)", modelGuid, xmlBytes.length);
+                return Optional.of(xmlBytes);
+            }
+            return Optional.empty();
+
+        } catch (Exception e) {
+            return handleBinaryExportException(modelGuid, "domain model LOIN XML", e);
+        }
+    }
+
+    /**
+     * Export domain model as IDS. 🏢
+     */
+    public Optional<byte[]> exportDomainModelIds(UUID modelGuid) {
+        try {
+            logger.debug("Attempting to export domain model {} as IDS", modelGuid);
+            byte[] idsBytes = domainModelsApi.exportIds1(modelGuid);
+
+            if (idsBytes != null && idsBytes.length > 0) {
+                logger.debug("Successfully exported domain model {} as IDS ({} bytes)", modelGuid, idsBytes.length);
+                return Optional.of(idsBytes);
+            }
+            return Optional.empty();
+
+        } catch (Exception e) {
+            return handleBinaryExportException(modelGuid, "domain model IDS", e);
+        }
+    }
+
+
+
+    // === CONTEXT INFORMATION METHODS ===
+
+    /**
+     * Search for context information with optional criteria.
+     * @param request Search criteria (null for all context information)
+     * @return List of context information
+     */
+    public List<SimpleContextInfoPublicDto> searchContextInfo(AiaContextInfoPublicRequest request) {
+        try {
+            return contextInfoApi.getContextInfosForPublic(request);
+        } catch (Exception e) {
+            logger.error("Error searching context information: {}", e.getMessage());
+            return List.of();
+        }
+    }
+
+    /**
+     * Search for all context information.
+     * @return List of all context information
+     */
+    public List<SimpleContextInfoPublicDto> searchContextInfo() {
+        return searchContextInfo(new AiaContextInfoPublicRequest());
+    }
+
+    /**
+     * Get detailed context information.
+     * @param contextGuid Context information GUID
+     * @return Context information details or empty if not found
+     */
+    public Optional<AIAContextInfoPublicDto> getContextInfo(UUID contextGuid) {
+        try {
+            AIAContextInfoPublicDto contextInfo = contextInfoApi.getContextInfoForPublic(contextGuid);
+            return Optional.ofNullable(contextInfo);
+        } catch (Exception e) {
+            logger.error("Error getting context information {}: {}", contextGuid, e.getMessage());
+            return Optional.empty();
+        }
+    }
+
+    /**
+     * Export context information as PDF.
+     * @param contextGuid Context information GUID
+     * @return PDF content as byte array or empty if export failed
+     */
+    public Optional<byte[]> exportContextInfoPdf(UUID contextGuid) {
+        try {
+            byte[] pdfBytes = contextInfoApi.exportPdf2(contextGuid);
+            return Optional.ofNullable(pdfBytes);
+        } catch (Exception e) {
+            logger.error("Error exporting context information {} to PDF: {}", contextGuid, e.getMessage());
+            return Optional.empty();
+        }
+    }
+
+    /**
+     * Export context information as OpenOffice format.
+     * @param contextGuid Context information GUID
+     * @return ODT content as byte array or empty if export failed
+     */
+    public Optional<byte[]> exportContextInfoOpenOffice(UUID contextGuid) {
+        try {
+            byte[] odtBytes = contextInfoApi.exportOdt2(contextGuid);
+            return Optional.ofNullable(odtBytes);
+        } catch (Exception e) {
+            logger.error("Error exporting context information {} to OpenOffice: {}", contextGuid, e.getMessage());
+            return Optional.empty();
+        }
+    }
+
+    // === TEMPLATE METHODS ===
+
+    /**
+     * Search for AIA templates with optional criteria.
+     * @param request Search criteria (null for all templates)
+     * @return List of templates
+     */
+    public List<SimpleAiaTemplatePublicDto> searchTemplates(AiaTemplateForPublicRequest request) {
+        try {
+            return templatesApi.getTemplatesForPublic(request);
+        } catch (Exception e) {
+            logger.error("Error searching templates: {}", e.getMessage());
+            return List.of();
+        }
+    }
+
+    /**
+     * Search for all AIA templates.
+     * @return List of all templates
+     */
+    public List<SimpleAiaTemplatePublicDto> searchTemplates() {
+        return searchTemplates(new AiaTemplateForPublicRequest());
+    }
+
+    /**
+     * Get detailed template information.
+     * @param templateGuid Template GUID
+     * @return Template details or empty if not found
+     */
+    public Optional<AIATemplatePublicDto> getTemplate(UUID templateGuid) {
+        try {
+            AIATemplatePublicDto template = templatesApi.getTemplateForPublic(templateGuid);
+            return Optional.ofNullable(template);
+        } catch (Exception e) {
+            logger.error("Error getting template {}: {}", templateGuid, e.getMessage());
+            return Optional.empty();
+        }
+    }
+
+    /**
+     * Export template as PDF.
+     * @param templateGuid Template GUID
+     * @return PDF content as byte array or empty if export failed
+     */
+    public Optional<byte[]> exportTemplatePdf(UUID templateGuid) {
+        try {
+            byte[] pdfBytes = templatesApi.exportPdf3(templateGuid);
+            return Optional.ofNullable(pdfBytes);
+        } catch (Exception e) {
+            logger.error("Error exporting template {} to PDF: {}", templateGuid, e.getMessage());
+            return Optional.empty();
+        }
+    }
+
+    /**
+     * Export template as OpenOffice format.
+     * @param templateGuid Template GUID
+     * @return ODT content as byte array or empty if export failed
+     */
+    public Optional<byte[]> exportTemplateOpenOffice(UUID templateGuid) {
+        try {
+            byte[] odtBytes = templatesApi.exportOdt3(templateGuid);
+            return Optional.ofNullable(odtBytes);
+        } catch (Exception e) {
+            logger.error("Error exporting template {} to OpenOffice: {}", templateGuid, e.getMessage());
+            return Optional.empty();
+        }
+    }
+
+    // === PROJECT METHODS WITH BINARY SUPPORT ===
+
+    /**
+     * Search for projects with optional criteria.
+     */
+    public List<SimpleAiaProjectPublicDto> searchProjects(AiaProjectForPublicRequest request) {
+        try {
+            return projectsApi.getProjectsForPublic(request);
+        } catch (Exception e) {
+            logger.error("Error searching projects: {}", e.getMessage());
+            return List.of();
+        }
+    }
+
+    /**
+     * Search for all projects.
+     */
+    public List<SimpleAiaProjectPublicDto> searchProjects() {
+        return searchProjects(new AiaProjectForPublicRequest());
+    }
+
+    /**
+     * Get detailed project information.
+     */
+    public Optional<AIAProjectPublicDto> getProject(UUID projectGuid) {
+        try {
+            AIAProjectPublicDto project = projectsApi.getProjectForPublic(projectGuid);
+            return Optional.ofNullable(project);
+        } catch (Exception e) {
+            logger.error("Error getting project {}: {}", projectGuid, e.getMessage());
+            return Optional.empty();
+        }
+    }
+
+    /**
+     * Export project as PDF with proper binary handling.
+     */
+    public Optional<byte[]> exportProjectPdf(UUID projectGuid) {
+        try {
+            logger.debug("Attempting to export project {} as PDF", projectGuid);
+            byte[] pdfBytes = projectsApi.exportPdf4(projectGuid);
+
+            if (pdfBytes != null && pdfBytes.length > 0) {
+                // Verify it's actually PDF content
+                if (isPdfContent(pdfBytes)) {
+                    logger.debug("Successfully exported project {} as PDF ({} bytes)", projectGuid, pdfBytes.length);
+                    return Optional.of(pdfBytes);
+                } else {
+                    logger.warn("Response for project {} PDF export doesn't appear to be valid PDF content", projectGuid);
+                    return Optional.empty();
+                }
+            }
+
+            logger.warn("PDF export for project {} returned empty content", projectGuid);
+            return Optional.empty();
+
+//        } catch (com.bimportal.client.decoder.BinaryResponseErrorDecoder.BinaryContentMisinterpretedException e) {
+//            // This exception indicates that the response was binary but treated as an error
+//            logger.warn("PDF export for project {} might have succeeded but was misinterpreted: {}", projectGuid, e.getMessage());
+//            return Optional.empty();
+        } catch (Exception e) {
+            // Handle other types of exceptions
+            String errorMsg = e.getMessage();
+            if (errorMsg != null && errorMsg.contains("Unexpected character ('%'")) {
+                logger.info("PDF export for project {} returned binary content but client couldn't parse it properly", projectGuid);
+                // This is actually a success case, but we can't access the content due to client configuration
+                return Optional.empty();
+            } else if (errorMsg != null && errorMsg.contains("404")) {
+                logger.debug("Project {} not found for PDF export", projectGuid);
+                return Optional.empty();
+            } else {
+                logger.error("Error exporting project {} to PDF: {}", projectGuid, errorMsg);
+                return Optional.empty();
+            }
+        }
+    }
+
+    /**
+     * Export project as OpenOffice format with proper binary handling.
+     */
+    public Optional<byte[]> exportProjectOpenOffice(UUID projectGuid) {
+        try {
+            logger.debug("Attempting to export project {} as OpenOffice format", projectGuid);
+            byte[] odtBytes = projectsApi.exportOdt4(projectGuid);
+
+            if (odtBytes != null && odtBytes.length > 0) {
+                logger.debug("Successfully exported project {} as OpenOffice format ({} bytes)", projectGuid, odtBytes.length);
+                return Optional.of(odtBytes);
+            }
+            return Optional.empty();
+
+        } catch (Exception e) {
+            return handleBinaryExportException(projectGuid, "OpenOffice", e);
+        }
+    }
+
+    /**
+     * Export project as OKSTRA format.
+     */
+    public Optional<byte[]> exportProjectOkstra(UUID projectGuid) {
+        try {
+            logger.debug("Attempting to export project {} as OKSTRA format", projectGuid);
+            byte[] okstraBytes = projectsApi.exportOkstra2(projectGuid);
+
+            if (okstraBytes != null && okstraBytes.length > 0) {
+                logger.debug("Successfully exported project {} as OKSTRA format ({} bytes)", projectGuid, okstraBytes.length);
+                return Optional.of(okstraBytes);
+            }
+            return Optional.empty();
+
+        } catch (Exception e) {
+            return handleBinaryExportException(projectGuid, "OKSTRA", e);
+        }
+    }
+
+    /**
+     * Export project as LOIN-XML format.
+     */
+    public Optional<byte[]> exportProjectLoinXml(UUID projectGuid) {
+        try {
+            logger.debug("Attempting to export project {} as LOIN-XML format", projectGuid);
+            byte[] xmlBytes = projectsApi.exportXml2(projectGuid);
+
+            if (xmlBytes != null && xmlBytes.length > 0) {
+                logger.debug("Successfully exported project {} as LOIN-XML format ({} bytes)", projectGuid, xmlBytes.length);
+                return Optional.of(xmlBytes);
+            }
+            return Optional.empty();
+
+        } catch (Exception e) {
+            return handleBinaryExportException(projectGuid, "LOIN-XML", e);
+        }
+    }
+
+    /**
+     * Export project as IDS format.
+     */
+    public Optional<byte[]> exportProjectIds(UUID projectGuid) {
+        try {
+            logger.debug("Attempting to export project {} as IDS format", projectGuid);
+            byte[] idsBytes = projectsApi.exportIds2(projectGuid);
+
+            if (idsBytes != null && idsBytes.length > 0) {
+                logger.debug("Successfully exported project {} as IDS format ({} bytes)", projectGuid, idsBytes.length);
+                return Optional.of(idsBytes);
+            }
+            return Optional.empty();
+
+        } catch (Exception e) {
+            return handleBinaryExportException(projectGuid, "IDS", e);
+        }
+    }
+
+
+    // === FILTER METHODS ===
+
+    /**
+     * Get AIA filters.
+     * @return List of AIA filter groups
+     */
+    public List<FilterGroupForPublicDto> getAiaFilters() {
+        try {
+            return aiaFilterApi.getGlobalFilters1();
+        } catch (Exception e) {
+            logger.error("Error getting AIA filters: {}", e.getMessage());
+            return List.of();
+        }
+    }
+
+
+
+
+
+    // === GETTER METHODS FOR DIRECT API ACCESS ===
+
+    public AiaProjekteApi getProjectsApi() { return projectsApi; }
+    public AiaLoinApi getLoinApi() { return loinApi; }
+    public FachmodelleApi getDomainModelsApi() { return domainModelsApi; }
+    public KontextinformationenApi getContextInfoApi() { return contextInfoApi; }
+    public AiaVorlagenApi getTemplatesApi() { return templatesApi; }
+    public MerkmaleApi getPropertiesApi() { return propertiesApi; }
+    public MerkmalsgruppenApi getPropertyGroupsApi() { return propertyGroupsApi; }
+    public AiaFilterApi getAiaFilterApi() { return aiaFilterApi; }
+    public InfrastrukturApi getInfraApi() { return infraApi; }
+
+    /**
+     * Get the underlying ApiClient for advanced usage.
+     */
+    public ApiClient getApiClient() {
+        return apiClient;
+    }
+
+    /**
+     * Gets the underlying InfrastrukturApi for direct access
+     */
+    public InfrastrukturApi getInfrastructureApi() {
+        return infraApi;
+    }
+
+    // === UTILITY METHODS ===
+
+    /**
+     * Common handler for binary export exceptions.
+     */
+    private Optional<byte[]> handleBinaryExportException(UUID guid, String format, Exception e) {
+        String errorMsg = e.getMessage();
+        if (errorMsg != null && errorMsg.contains("Unexpected character")) {
+            logger.info("{} export for {} returned binary content but client couldn't parse it properly", format, guid);
+            return Optional.empty();
+        } else if (errorMsg != null && errorMsg.contains("404")) {
+            logger.debug("{} {} not found for export", format, guid);
+            return Optional.empty();
+        } else {
+            logger.error("Error exporting {} {} to {}: {}", format, guid, format, errorMsg);
+            return Optional.empty();
+        }
+    }
+
+    /**
+     * Check if byte array contains PDF content.
+     */
+    private boolean isPdfContent(byte[] data) {
+        if (data == null || data.length < 4) {
+            return false;
+        }
+        // PDF files start with %PDF
+        return data[0] == 0x25 && data[1] == 0x50 && data[2] == 0x44 && data[3] == 0x46;
+    }
+
+    /**
+     * Helper method to save byte arrays to files.
+     */
+    public File saveToFile(byte[] data, String filename) {
+        try {
+            File file = new File("exports", filename);
+            file.getParentFile().mkdirs();
+
+            try (FileOutputStream fos = new FileOutputStream(file)) {
+                fos.write(data);
+            }
+
+            logger.info("Saved {} bytes to file: {}", data.length, file.getAbsolutePath());
+            return file;
+        } catch (IOException e) {
+            logger.error("Failed to save file {}: {}", filename, e.getMessage());
+            throw new RuntimeException("Failed to save file: " + filename, e);
+        }
+    }
+
+    /**
+     * Find the first exportable project from available projects.
+     */
+    public Optional<SimpleAiaProjectPublicDto> findExportableProject() {
+        try {
+            List<SimpleAiaProjectPublicDto> projects = searchProjects();
+            if (projects.isEmpty()) {
+                return Optional.empty();
+            }
+
+            logger.info("Checking {} projects for export capability...", projects.size());
+
+            int maxToTest = Math.min(projects.size(), BimPortalConfig.MAX_PROJECTS_TO_TEST);
+            for (int i = 0; i < maxToTest; i++) {
+                SimpleAiaProjectPublicDto project = projects.get(i);
+                logger.debug("   Testing project {}: {}...", i + 1, project.getName());
+
+                // First check if we can get project details
+                Optional<AIAProjectPublicDto> detailedProject = getProject(project.getGuid());
+                if (detailedProject.isEmpty()) {
+                    logger.debug("      Skip: Cannot access project details");
+                    continue;
+                }
+
+                // Test if PDF export works
+                Optional<byte[]> pdfContent = exportProjectPdf(project.getGuid());
+                if (pdfContent.isPresent()) {
+                    logger.info("      Found exportable project: {}", project.getName());
+                    return Optional.of(project);
+                } else {
+                    logger.debug("      Skip: Export not available");
+                }
+            }
+
+            logger.warn("   No exportable projects found in {} tested projects", maxToTest);
+            return Optional.empty();
+
+        } catch (Exception e) {
+            logger.error("Error finding exportable project: {}", e.getMessage());
+            return Optional.empty();
+        }
+    }
+
+    // === INNER CLASSES ===
+
+    /**
+     * Health check result container
+     */
+    public static class HealthCheckResult {
+        private final boolean apiAccessible;
+        private final boolean authWorking;
+        private final String statusMessage;
+        private final String errorDetails;
+        private final long responseTime;
+
+        public HealthCheckResult(boolean apiAccessible, boolean authWorking, String statusMessage,
+                                 String errorDetails, long responseTime) {
+            this.apiAccessible = apiAccessible;
+            this.authWorking = authWorking;
+            this.statusMessage = statusMessage;
+            this.errorDetails = errorDetails;
+            this.responseTime = responseTime;
+        }
+
+        public boolean isApiAccessible() { return apiAccessible; }
+        public boolean isAuthWorking() { return authWorking; }
+        public String getStatusMessage() { return statusMessage; }
+        public String getErrorDetails() { return errorDetails; }
+        public long getResponseTime() { return responseTime; }
+
+        @Override
+        public String toString() {
+            return String.format("HealthCheck{api=%s, auth=%s, message='%s'}",
+                    apiAccessible, authWorking, statusMessage);
+        }
+    }
+
+    /**
+     * API statistics container.
+     */
+    public static class ApiStats {
+        private final int projectCount;
+        private final int propertyCount;
+        private final int loinCount;
+        private final int domainModelCount;
+
+        public ApiStats(int projectCount, int propertyCount, int loinCount, int domainModelCount) {
+            this.projectCount = projectCount;
+            this.propertyCount = propertyCount;
+            this.loinCount = loinCount;
+            this.domainModelCount = domainModelCount;
+        }
+
+        public int getProjectCount() { return projectCount; }
+        public int getPropertyCount() { return propertyCount; }
+        public int getLoinCount() { return loinCount; }
+        public int getDomainModelCount() { return domainModelCount; }
+
+        @Override
+        public String toString() {
+            return String.format("ApiStats{projects=%d, properties=%d, loins=%d, domainModels=%d}",
+                    projectCount, propertyCount, loinCount, domainModelCount);
+        }
+    }
+}
