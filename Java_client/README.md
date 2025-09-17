@@ -162,6 +162,13 @@ bim-portal-client-suite/
 - Verify credentials are correct
 - Check `hackathon-template/README.md` for detailed setup
 
+**Java Version / Build Issues?**
+- Make sure to not use sudo when using Gradle
+- Use `java -version` and `javac -version` to verify the versions, they should both be 21
+- In IntelliJ, check the Project and the Modules tab under `File -> Project Structure` and verify the Java versions there
+- In the console, run an export `export JAVA_HOME=/path/to/jdk-21` that points to the directory of the Java SDK
+- Open a different console
+
 ## 📖 Learn More
 
 - Check `hackathon-template/README.md` for focused hackathon guide

@@ -78,9 +78,16 @@ client.logout();
 ## 🆘 Need Help?
 
 1. **API Issues**: Check your `.env` file credentials
-2. **Build Problems**: Run `./gradlew clean build`
-3. **Examples**: Study `BasicExample.java` for patterns
-4. **Documentation**: Check the enhanced client in `../bim-portal-enhanced/`
+2. **Build Problems**:
+- Make sure to not use sudo when using Gradle
+- Run `./gradlew clean build`
+4. **Examples**: Study `BasicExample.java` for patterns
+5. **Documentation**: Check the enhanced client in `../bim-portal-enhanced/`
+6. **Java Version Issues?**
+- Use `java -version` and `javac -version` to verify the versions, they should both be 21
+- In IntelliJ, check the Project and the Modules tab under `File -> Project Structure` and verify the Java versions there
+- In the console, run an export `export JAVA_HOME=/path/to/jdk-21` that points to the directory of the Java SDK
+- Open a different console
 
 ---
 
