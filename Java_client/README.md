@@ -4,7 +4,6 @@
 
 The BIM Portal is Germany's central platform for Building Information Modeling (BIM) data, providing standardized access to AIA projects, LOINs (Level of Information Need), domain models, and BIM requirements. This enhanced Java client eliminates the complexity of direct API integration, offering automatic authentication, simplified data access, and ready-to-use export capabilities.
 
-**Perfect for:** Developers building BIM applications, automating workflows, or creating innovative solutions for Germany's digital construction ecosystem.
 
 ## 📋 Table of Contents
 - [Quick Start](#-quick-start--5-minutes)
@@ -24,7 +23,6 @@ The BIM Portal is Germany's central platform for Building Information Modeling (
 
 ### 2. Get Running
 ```bash
-git clone <repository-url>
 cd bim-portal-client-suite
 ./gradlew build
 ```

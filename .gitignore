@@ -36,3 +36,14 @@
 # OS-specific
 .DS_Store
 Thumbs.db
+
+
+## Python:
+
+/**/__pycache__/
+*.py[cod]
+
+# Ignore generated export files
+/Python_client/exports/*
+!/Python_client/exports/.gitkeep
+/Python_client/.venv/
