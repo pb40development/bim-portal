@@ -6,14 +6,12 @@ Ready-to-use template for building innovative solutions with the BIM Portal API.
 
 ### 1. Setup Credentials
 ```bash
-cd hackathon-template
 cp .env_example .env
 # Edit .env with your BIM Portal credentials
 ```
 
 ### 2. Run Examples
 ```bash
-cd .. # To come back to project root directory
 # From project root
 ./gradlew :hackathon-template:runBasicExample    # Learn the API
 ./gradlew :hackathon-template:run                # Start building

@@ -32,7 +32,6 @@ After setting up an account on the [BIM Portal](https://via.bund.de/bmdv/bim-por
 
 **For Hackathon Participants** (Recommended):
 ```bash
-cd hackathon-template
 cp .env_example .env
 # Edit .env with your credentials
 ```
@@ -99,7 +98,7 @@ if (exportableProject.isPresent()) {
 - 🏷️ Properties & Classifications
 
 **Export Formats:**
-- 📄 PDF, 📝 OpenOffice, 🗏️ OKSTRA, 📋 LOIN-XML, 🏷️ IDS
+- 📄 PDF, 📝 OpenOffice, 🗏️ OKSTRA, 📋 LOIN-XML, 🏷️ IDS (in case of several files they are zipped)
 
 ## 🛠️ Key Commands
 
