@@ -19,7 +19,7 @@ import java.util.Optional;
  * Context information export examples for BIM Portal Java client.
  *
  * Demonstrates context information export workflows in multiple formats including
- * PDF and OpenOffice.
+ * PDF and OpenOffice with automatic file type detection.
  */
 public class ContextInfoExportExample {
 
@@ -70,38 +70,44 @@ public class ContextInfoExportExample {
 
             System.out.println("\n2️⃣ Exporting context information...");
 
-            // PDF Export
+            // PDF Export with auto-detection
             System.out.println("   📄 Exporting as PDF...");
             Optional<byte[]> pdfContent = client.exportContextInfoPdf(selectedContext.getGuid());
             if (pdfContent.isPresent()) {
-                String filename = "context_" + selectedContext.getGuid() + ".pdf";
-                Optional<Path> pdfPath = ExportUtils.saveExportFile(pdfContent.get(), filename);
+                String baseFilename = "context_pdf_" + selectedContext.getGuid();
+                Optional<Path> pdfPath = ExportUtils.exportWithDetection(pdfContent.get(), baseFilename, "pdf");
                 if (pdfPath.isPresent()) {
                     exportResults.put("PDF", pdfPath.get());
                     System.out.println("   ✅ PDF exported: " + pdfPath.get());
+                } else {
+                    System.out.println("   ❌ PDF export failed: Could not save file");
                 }
             } else {
-                System.out.println("   ❌ PDF export failed");
+                System.out.println("   ❌ PDF export failed: No content received");
             }
 
-            // OpenOffice Export
+            // OpenOffice Export with auto-detection
             System.out.println("   📝 Exporting as OpenOffice...");
             Optional<byte[]> odtContent = client.exportContextInfoOpenOffice(selectedContext.getGuid());
             if (odtContent.isPresent()) {
-                String filename = "context_" + selectedContext.getGuid() + ".odt";
-                Optional<Path> odtPath = ExportUtils.saveExportFile(odtContent.get(), filename);
+                String baseFilename = "context_odt_" + selectedContext.getGuid();
+                Optional<Path> odtPath = ExportUtils.exportWithDetection(odtContent.get(), baseFilename, "odt");
                 if (odtPath.isPresent()) {
                     exportResults.put("OpenOffice", odtPath.get());
                     System.out.println("   ✅ OpenOffice exported: " + odtPath.get());
+                } else {
+                    System.out.println("   ❌ OpenOffice export failed: Could not save file");
                 }
             } else {
-                System.out.println("   ❌ OpenOffice export failed");
+                System.out.println("   ❌ OpenOffice export failed: No content received");
             }
 
-            // Summary
+            // Summary with file type information
             System.out.println("\n📈 Export Summary: " + exportResults.size() + "/2 formats successful");
             for (Map.Entry<String, Path> entry : exportResults.entrySet()) {
-                System.out.println("   ✅ " + entry.getKey() + ": " + entry.getValue());
+                String filename = entry.getValue().getFileName().toString();
+                String extension = filename.substring(filename.lastIndexOf('.') + 1).toUpperCase();
+                System.out.println("   ✅ " + entry.getKey() + " (" + extension + "): " + entry.getValue());
             }
 
         } catch (Exception e) {

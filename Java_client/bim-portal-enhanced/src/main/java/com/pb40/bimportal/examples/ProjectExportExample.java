@@ -19,7 +19,7 @@ import java.util.Optional;
  * Project export examples for BIM Portal Java client.
  *
  * Demonstrates project export workflows in multiple formats including
- * PDF, OpenOffice, OKSTRA, LOIN-XML, and IDS.
+ * PDF, OpenOffice, OKSTRA, LOIN-XML, and IDS with automatic file type detection.
  */
 public class ProjectExportExample {
 
@@ -80,84 +80,97 @@ public class ProjectExportExample {
 
             System.out.println("\n3️⃣ Exporting project in multiple formats...");
 
-            // PDF Export
+            // PDF Export with auto-detection
             System.out.println("   📄 Exporting as PDF...");
             Optional<byte[]> pdfContent = client.exportProjectPdf(selectedProject.getGuid());
             if (pdfContent.isPresent()) {
-                String filename = "project_" + selectedProject.getGuid() + ".pdf";
-                Optional<Path> pdfPath = ExportUtils.saveExportFile(pdfContent.get(), filename);
+                String baseFilename = "project_pdf_" + selectedProject.getGuid();
+                Optional<Path> pdfPath = ExportUtils.exportWithDetection(pdfContent.get(), baseFilename, "pdf");
                 if (pdfPath.isPresent()) {
                     exportResults.put("PDF", pdfPath.get());
                     System.out.println("   ✅ PDF exported: " + pdfPath.get());
+                } else {
+                    System.out.println("   ❌ PDF export failed: Could not save file");
                 }
             } else {
-                System.out.println("   ❌ PDF export failed");
+                System.out.println("   ❌ PDF export failed: No content received");
             }
 
-            // OpenOffice Export
+            // OpenOffice Export with auto-detection
             System.out.println("   📝 Exporting as OpenOffice...");
             Optional<byte[]> odtContent = client.exportProjectOpenOffice(selectedProject.getGuid());
             if (odtContent.isPresent()) {
-                String filename = "project_" + selectedProject.getGuid() + ".odt";
-                Optional<Path> odtPath = ExportUtils.saveExportFile(odtContent.get(), filename);
+                String baseFilename = "project_odt_" + selectedProject.getGuid();
+                Optional<Path> odtPath = ExportUtils.exportWithDetection(odtContent.get(), baseFilename, "odt");
                 if (odtPath.isPresent()) {
                     exportResults.put("OpenOffice", odtPath.get());
                     System.out.println("   ✅ OpenOffice exported: " + odtPath.get());
+                } else {
+                    System.out.println("   ❌ OpenOffice export failed: Could not save file");
                 }
             } else {
-                System.out.println("   ❌ OpenOffice export failed");
+                System.out.println("   ❌ OpenOffice export failed: No content received");
             }
 
-            // OKSTRA Export
-            System.out.println("   🗗️ Exporting as OKSTRA...");
+            // OKSTRA Export with auto-detection
+            System.out.println("   🏗️ Exporting as OKSTRA...");
             Optional<byte[]> okstraContent = client.exportProjectOkstra(selectedProject.getGuid());
             if (okstraContent.isPresent()) {
-                String filename = "project_" + selectedProject.getGuid() + ".zip";
-                Optional<Path> okstraPath = ExportUtils.saveExportFile(okstraContent.get(), filename);
+                String baseFilename = "project_okstra_" + selectedProject.getGuid();
+                Optional<Path> okstraPath = ExportUtils.exportWithDetection(okstraContent.get(), baseFilename, "zip");
                 if (okstraPath.isPresent()) {
                     exportResults.put("OKSTRA", okstraPath.get());
                     System.out.println("   ✅ OKSTRA exported: " + okstraPath.get());
+                } else {
+                    System.out.println("   ❌ OKSTRA export failed: Could not save file");
                 }
             } else {
-                System.out.println("   ❌ OKSTRA export failed");
+                System.out.println("   ❌ OKSTRA export failed: No content received");
             }
 
-            // LOIN-XML Export
+            // LOIN-XML Export with auto-detection
             System.out.println("   🔗 Exporting as LOIN-XML...");
             Optional<byte[]> loinXmlContent = client.exportProjectLoinXml(selectedProject.getGuid());
             if (loinXmlContent.isPresent()) {
-                String filename = "project_" + selectedProject.getGuid() + "_loin.zip";
-                Optional<Path> loinXmlPath = ExportUtils.saveExportFile(loinXmlContent.get(), filename);
+                String baseFilename = "project_loin_" + selectedProject.getGuid();
+                Optional<Path> loinXmlPath = ExportUtils.exportWithDetection(loinXmlContent.get(), baseFilename, "zip");
                 if (loinXmlPath.isPresent()) {
                     exportResults.put("LOIN-XML", loinXmlPath.get());
                     System.out.println("   ✅ LOIN-XML exported: " + loinXmlPath.get());
+                } else {
+                    System.out.println("   ❌ LOIN-XML export failed: Could not save file");
                 }
             } else {
                 System.out.println("   ⚠️ LOIN-XML export failed (may require special permissions)");
             }
 
-            // IDS Export
+            // IDS Export with auto-detection
             System.out.println("   🆔 Exporting as IDS...");
             Optional<byte[]> idsContent = client.exportProjectIds(selectedProject.getGuid());
             if (idsContent.isPresent()) {
-                String filename = "project_" + selectedProject.getGuid() + ".ids";
-                Optional<Path> idsPath = ExportUtils.saveExportFile(idsContent.get(), filename);
+                String baseFilename = "project_ids_" + selectedProject.getGuid();
+                Optional<Path> idsPath = ExportUtils.exportWithDetection(idsContent.get(), baseFilename, "xml");
                 if (idsPath.isPresent()) {
                     exportResults.put("IDS", idsPath.get());
                     System.out.println("   ✅ IDS exported: " + idsPath.get());
+                } else {
+                    System.out.println("   ❌ IDS export failed: Could not save file");
                 }
             } else {
                 System.out.println("   ⚠️ IDS export failed (may require special permissions)");
             }
 
-            // Summary
+            // Summary with file type information
             System.out.println("\n📈 Export Summary: " + exportResults.size() + "/5 formats successful");
             for (Map.Entry<String, Path> entry : exportResults.entrySet()) {
-                System.out.println("   ✅ " + entry.getKey() + ": " + entry.getValue());
+                String filename = entry.getValue().getFileName().toString();
+                String extension = filename.substring(filename.lastIndexOf('.') + 1).toUpperCase();
+                System.out.println("   ✅ " + entry.getKey() + " (" + extension + "): " + entry.getValue());
             }
 
             if (exportResults.size() < 3) {
                 System.out.println("💡 Note: Some export formats may require special permissions or project setup");
+                System.out.println("💡 Content type detection helps ensure correct file extensions are used");
             }
 
         } catch (Exception e) {

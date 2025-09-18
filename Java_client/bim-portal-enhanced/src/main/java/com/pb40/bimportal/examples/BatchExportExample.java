@@ -61,8 +61,8 @@ public class BatchExportExample {
 
                     Optional<byte[]> pdfContent = client.exportProjectPdf(project.getGuid());
                     if (pdfContent.isPresent()) {
-                        String filename = "batch_project_" + (i + 1) + "_" + project.getGuid() + ".pdf";
-                        Optional<Path> savedPath = ExportUtils.saveExportFile(pdfContent.get(), filename);
+                        String baseFilename = "batch_project_" + (i + 1) + "_" + project.getGuid();
+                        Optional<Path> savedPath = ExportUtils.exportWithDetection(pdfContent.get(), baseFilename, "pdf");
                         if (savedPath.isPresent()) {
                             totalExported++;
                             System.out.println("   ✅ Success: " + savedPath.get());
@@ -92,8 +92,8 @@ public class BatchExportExample {
 
                     Optional<byte[]> pdfContent = client.exportLoinPdf(loin.getGuid());
                     if (pdfContent.isPresent()) {
-                        String filename = "batch_loin_" + (i + 1) + "_" + loin.getGuid() + ".pdf";
-                        Optional<Path> savedPath = ExportUtils.saveExportFile(pdfContent.get(), filename);
+                        String baseFilename = "batch_loin_" + (i + 1) + "_" + loin.getGuid();
+                        Optional<Path> savedPath = ExportUtils.exportWithDetection(pdfContent.get(), baseFilename, "pdf");
                         if (savedPath.isPresent()) {
                             totalExported++;
                             System.out.println("   ✅ Success: " + savedPath.get());

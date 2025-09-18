@@ -625,16 +625,16 @@ def main():
         auth_service = AuthService(guid=PRIVATE_LOIN_GUID)
         client = EnhancedBimPortalClient(auth_service=auth_service, base_url=BASE_URL)
         
-        # Run all export examples
-        run_project_export_examples(client)
-        run_loin_export_examples(client)
-        run_domain_model_export_examples(client)
-        run_context_info_export_examples(client)
-        run_template_export_examples(client)
-        run_batch_export_examples(client)
-        
-        # Run utility examples
-        run_filter_examples(client)
+        # # Run all export examples
+        # run_project_export_examples(client)
+        # run_loin_export_examples(client)
+        # run_domain_model_export_examples(client)
+        # run_context_info_export_examples(client)
+        # run_template_export_examples(client)
+        # run_batch_export_examples(client)
+        #
+        # # Run utility examples
+        # run_filter_examples(client)
         run_organization_examples(client)
         
         print("\n" + "🎉 " + "="*70)
