@@ -34,7 +34,68 @@ tasks.jar {
     from(configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) })
 }
 
-// Custom tasks for running examples
+// --- Helper to load .env ---
+fun loadEnvFile(): Map<String, String> {
+    val envProps = mutableMapOf<String, String>()
+    val searchPaths = listOf(
+        file(".env"),
+        file("../.env"),
+        file("../../.env"),
+        rootProject.file(".env")
+    )
+
+    val envFile = searchPaths.firstOrNull { it.exists() }
+
+    if (envFile != null) {
+        envFile.readLines().forEach { line ->
+            val cleanLine = line.trim()
+            if (cleanLine.isNotEmpty() && !cleanLine.startsWith("#") && cleanLine.contains("=")) {
+                val parts = cleanLine.split("=", limit = 2)
+                if (parts.size == 2) {
+                    val key = parts[0].trim()
+                    val value = parts[1].trim().removeSurrounding("\"").removeSurrounding("'")
+                    envProps[key] = value
+                }
+            }
+        }
+
+        println("✅ Loaded ${envProps.size} environment variables from ${envFile.name}")
+        envProps["LOG_LEVEL"]?.let { println("   LOG_LEVEL: $it") }
+    } else {
+        println("❌ No .env file found in search paths")
+    }
+
+    return envProps
+}
+
+// Load .env once
+val envProperties by lazy { loadEnvFile() }
+
+// --- Configure JavaExec tasks ---
+tasks.withType<JavaExec> {
+    val logLevel = envProperties["LOG_LEVEL"] ?: "INFO"
+
+    // System properties for logging
+    systemProperty("LOG_LEVEL", logLevel)
+    systemProperty("logging.level.root", logLevel)
+    systemProperty("logging.level.com.pb40.bimportal", logLevel)
+    systemProperty("logging.level.com.bimportal.client", logLevel)
+    systemProperty("logging.level.feign", envProperties["FEIGN_LOG_LEVEL"] ?: "WARN")
+    systemProperty("logging.level.okhttp3", envProperties["OKHTTP_LOG_LEVEL"] ?: "WARN")
+    systemProperty("logging.level.com.fasterxml.jackson", envProperties["JACKSON_LOG_LEVEL"] ?: "WARN")
+    systemProperty("logging.level.org.springframework.web", envProperties["SPRING_WEB_LOG_LEVEL"] ?: "WARN")
+    systemProperty("logging.level.org.springframework.security", envProperties["SPRING_SECURITY_LOG_LEVEL"] ?: "WARN")
+    systemProperty("logging.level.org.springframework.boot", envProperties["SPRING_BOOT_LOG_LEVEL"] ?: "WARN")
+    systemProperty("logging.level.org.springframework.context", envProperties["SPRING_CONTEXT_LOG_LEVEL"] ?: "WARN")
+
+    // Propagate all .env vars both as env vars and system properties
+    envProperties.forEach { (key, value) ->
+        environment(key, value)    // available via System.getenv()
+        systemProperty(key, value) // available via System.getProperty()
+    }
+}
+
+// --- Custom tasks ---
 tasks.register<JavaExec>("quickStart") {
     group = "examples"
     description = "Run the quick start example"
@@ -42,13 +103,12 @@ tasks.register<JavaExec>("quickStart") {
     mainClass.set("com.pb40.bimportal.examples.QuickStart")
 }
 
-//tasks.register<JavaExec>("exportExamples") {
-//    group = "examples"
-//    description = "Run comprehensive export examples"
-//    classpath = sourceSets.main.get().runtimeClasspath
-//    mainClass.set("com.pb40.bimportal.examples.ExportExamples")
-//}
-
+tasks.register<JavaExec>("exportExamples") {
+    group = "examples"
+    description = "Run comprehensive export examples"
+    classpath = sourceSets.main.get().runtimeClasspath
+    mainClass.set("com.pb40.bimportal.examples.ExportExamples")
+}
 
 tasks.register<JavaExec>("healthCheck") {
     group = "examples"
@@ -61,11 +121,16 @@ tasks.register<JavaExec>("checkApiMethods") {
     group = "examples"
     description = "Check available methods in generated API classes"
     classpath = sourceSets.main.get().runtimeClasspath
-    mainClass.set("com.pb40.bimportal.client.ApiMethodChecker")
+    mainClass.set("com.bimportal.client.ApiMethodChecker")
 }
 
+tasks.register<JavaExec>("configDebugTest") {
+    group = "examples"
+    description = "Run configuration debug test with proper logging"
+    classpath = sourceSets.main.get().runtimeClasspath
+    mainClass.set("com.pb40.bimportal.examples.ConfigDebugTest")
+}
 
-// New independent export examples
 tasks.register<JavaExec>("exportProjects") {
     group = "examples"
     description = "Export projects in multiple formats (PDF, OpenOffice, OKSTRA, LOIN-XML, IDS)"
@@ -117,12 +182,11 @@ tasks.register<JavaExec>("searchExamples") {
 
 tasks.register<JavaExec>("organizationExamples") {
     group = "examples"
-    description = "Run organizationexamples"
+    description = "Run organization examples"
     classpath = sourceSets.main.get().runtimeClasspath
     mainClass.set("com.pb40.bimportal.examples.OrganizationExample")
 }
 
-// Convenience task to run all export examples
 tasks.register("runAllExamples") {
     group = "examples"
     description = "Run all export examples sequentially"
@@ -136,16 +200,14 @@ tasks.register("runAllExamples") {
         "searchExamples",
         "organizationExamples"
     )
-
     doLast {
         println("All export examples completed!")
     }
 }
 
-//// Resource processing
-//tasks.processResources {
-//    val projectProps = project.properties
-//    filesMatching("application.properties") {
-//        expand(projectProps)
-//    }
-//}
+// --- Resource processing ---
+tasks.processResources {
+    filesMatching("application.properties") {
+        expand(project.properties)
+    }
+}
