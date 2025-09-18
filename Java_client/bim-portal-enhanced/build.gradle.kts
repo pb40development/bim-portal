@@ -206,8 +206,8 @@ tasks.register("runAllExamples") {
 }
 
 // --- Resource processing ---
-tasks.processResources {
-    filesMatching("application.properties") {
-        expand(project.properties)
-    }
-}
+//tasks.processResources {
+//    filesMatching("application.properties") {
+//        expand(project.properties)
+//    }
+//}

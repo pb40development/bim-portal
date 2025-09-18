@@ -66,13 +66,7 @@ public interface AuthService {
      */
     boolean hasCredentials();
 
-    /**
-     * Get the context GUID used for authentication.
-     * @return Context GUID
-     */
-    String getContextGuid();
-
-    // New methods for JWT user UUID extraction
+    // JWT user UUID extraction methods
 
     /**
      * Get the current user UUID extracted from JWT token.

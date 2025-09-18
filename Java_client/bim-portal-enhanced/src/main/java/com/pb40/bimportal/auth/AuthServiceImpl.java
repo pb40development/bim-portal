@@ -24,42 +24,30 @@ public class AuthServiceImpl implements AuthService {
 
     private final TokenManager tokenManager;
     private final InfrastrukturApi infraApi;
-    private final String contextGuid;
     private final String username;
     private final String password;
 
     /**
      * Constructor with explicit credentials.
      * @param infraApi Infrastructure API client
-     * @param contextGuid Context GUID for authentication
      * @param username Username for authentication
      * @param password Password for authentication
      */
-    public AuthServiceImpl(InfrastrukturApi infraApi, String contextGuid, String username, String password) {
+    public AuthServiceImpl(InfrastrukturApi infraApi, String username, String password) {
         this.infraApi = ApiClientFactory.createInfrastrukturApi();
-        this.contextGuid = contextGuid != null ? contextGuid : BimPortalConfig.DEFAULT_AUTH_GUID;
         this.username = username;
         this.password = password;
         this.tokenManager = new TokenManager();
 
-        logger.debug("AuthService initialized with context GUID: {}", this.contextGuid);
+        logger.debug("AuthService initialized for user: {}", username);
     }
 
     /**
      * Constructor using configuration from environment.
      * @param infraApi Infrastructure API client
-     * @param contextGuid Context GUID for authentication
-     */
-    public AuthServiceImpl(InfrastrukturApi infraApi, String contextGuid) {
-        this(infraApi, contextGuid, BimPortalConfig.getUsername(), BimPortalConfig.getPassword());
-    }
-
-    /**
-     * Constructor with default context GUID from configuration.
-     * @param infraApi Infrastructure API client
      */
     public AuthServiceImpl(InfrastrukturApi infraApi) {
-        this(infraApi, BimPortalConfig.DEFAULT_AUTH_GUID);
+        this(infraApi, BimPortalConfig.getUsername(), BimPortalConfig.getPassword());
     }
 
     @Override
@@ -144,7 +132,7 @@ public class AuthServiceImpl implements AuthService {
             }
         } catch (AuthenticationException e) {
             logger.error("Could not obtain a valid token after login attempt.");
-            throw new AuthenticationException("Failed to authenticate. Please check credentials and GUID.", e);
+            throw new AuthenticationException("Failed to authenticate. Please check credentials.", e);
         }
 
         throw new AuthenticationException("Authentication failed: Unable to obtain valid token");
@@ -221,11 +209,6 @@ public class AuthServiceImpl implements AuthService {
     public boolean hasCredentials() {
         return username != null && password != null
                 && !username.trim().isEmpty() && !password.trim().isEmpty();
-    }
-
-    @Override
-    public String getContextGuid() {
-        return contextGuid;
     }
 
     /**

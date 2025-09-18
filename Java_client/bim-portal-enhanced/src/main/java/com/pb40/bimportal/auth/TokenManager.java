@@ -5,6 +5,7 @@ import com.bimportal.client.model.JWTTokenPublicDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.Base64;
 import java.util.Optional;
@@ -53,22 +54,23 @@ public class TokenManager {
             // Extract user UUID from JWT token
             this.currentUserId = extractUserIdFromToken(tokenResponse.getToken());
 
-            // First try to use validTill from the response if available
-            if (tokenResponse.getValidTill() != null) {
-                // The validTill field contains the actual expiration time
-                this.tokenExpiresAt = tokenResponse.getValidTill().toInstant();
-                logger.info("Using validTill from response. Token expires at: {}", tokenExpiresAt);
-            } else {
-                // Fallback to parsing the JWT token itself
-                this.tokenExpiresAt = parseTokenExpiration(tokenResponse.getToken());
-                logger.info("Parsed expiration from JWT. Token expires at: {}", tokenExpiresAt);
-            }
+            Instant now = Instant.now();
 
-            // Log token validity duration for debugging
-            if (tokenExpiresAt != null) {
-                long secondsUntilExpiry = tokenExpiresAt.getEpochSecond() - Instant.now().getEpochSecond();
-                logger.debug("Token valid for {} seconds (~{} minutes)",
-                        secondsUntilExpiry, secondsUntilExpiry / 60);
+            // ALWAYS use the JWT exp claim - it's the reliable source
+            this.tokenExpiresAt = parseTokenExpiration(tokenResponse.getToken());
+            logger.info("Using JWT expiration. Token expires at: {}", tokenExpiresAt);
+
+            // Log token validity duration
+            Duration validityDuration = Duration.between(now, tokenExpiresAt);
+            long secondsUntilExpiry = validityDuration.getSeconds();
+            long millisUntilExpiry = validityDuration.toMillis();
+
+            logger.debug("Token valid for {} seconds ({} milliseconds)",
+                    secondsUntilExpiry, millisUntilExpiry);
+
+            // Additional warning if token is about to expire
+            if (secondsUntilExpiry < 50) {
+                logger.warn("Token has only {} seconds remaining - consider refreshing soon", secondsUntilExpiry);
             }
 
             // Log user information
@@ -262,7 +264,7 @@ public class TokenManager {
 
             // Decode the payload (second part of JWT)
             String payload = new String(Base64.getUrlDecoder().decode(parts[1]));
-            logger.debug("JWT payload: {}", payload);
+//            logger.debug("JWT payload: {}", payload);
 
             // Use pattern matching for more reliable extraction
             Matcher matcher = EXP_PATTERN.matcher(payload);

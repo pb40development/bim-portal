@@ -23,11 +23,6 @@ public class BimPortalConfig {
     public static final String REFRESH_ENDPOINT = "/infrastruktur/api/v1/public/auth/refresh-token";
     public static final String LOGOUT_ENDPOINT = "/infrastruktur/api/v1/public/auth/logout";
 
-    // === Default GUIDs ===
-    public static final String DEFAULT_AUTH_GUID = "4559818c-faea-4bb7-bbdd-e6470df8261b";
-    public static final String PUBLIC_RESOURCE_GUID = "80730a51-a953-4a80-9eaa-debfab31f6e9";
-    public static final String PRIVATE_RESOURCE_GUID = "4559818c-faea-4bb7-bbdd-e6470df8261b";
-
     // === Authentication Configuration ===
     public static final String USERNAME_ENV_VAR = "BIM_PORTAL_USERNAME";
     public static final String PASSWORD_ENV_VAR = "BIM_PORTAL_PASSWORD";
@@ -203,7 +198,6 @@ public class BimPortalConfig {
         System.out.println("--- BIM Portal Enhanced Client Configuration ---");
         System.out.println("Base URL:          " + getBaseUrl());
         System.out.println("Login URL:         " + getLoginUrl());
-        System.out.println("Default Auth GUID: " + DEFAULT_AUTH_GUID);
         System.out.println("Export Directory:  " + getExportPath());
         System.out.println("Request Timeout:   " + getRequestTimeout().getSeconds() + "s");
         System.out.println("SSL Verification:  " + VERIFY_SSL);

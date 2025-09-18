@@ -17,7 +17,6 @@ import feign.jackson.JacksonEncoder;
 public class BimPortalClientBuilder {
 
     private String baseUrl;
-    private String contextGuid;
     private String username;
     private String password;
     private AuthService authService;
@@ -29,7 +28,6 @@ public class BimPortalClientBuilder {
     public BimPortalClientBuilder() {
         // Set defaults from configuration
         this.baseUrl = BimPortalConfig.getBaseUrl();
-        this.contextGuid = BimPortalConfig.DEFAULT_AUTH_GUID;
     }
 
     /**
@@ -39,16 +37,6 @@ public class BimPortalClientBuilder {
      */
     public BimPortalClientBuilder withBaseUrl(String baseUrl) {
         this.baseUrl = baseUrl;
-        return this;
-    }
-
-    /**
-     * Set custom context GUID.
-     * @param contextGuid Context GUID for authentication
-     * @return This builder instance
-     */
-    public BimPortalClientBuilder withContextGuid(String contextGuid) {
-        this.contextGuid = contextGuid;
         return this;
     }
 
@@ -103,9 +91,9 @@ public class BimPortalClientBuilder {
             InfrastrukturApi infraApi = createInfrastrukturApi();
 
             if (useDefaultCredentials) {
-                authService = new AuthServiceImpl(infraApi, contextGuid);
+                authService = new AuthServiceImpl(infraApi);
             } else {
-                authService = new AuthServiceImpl(infraApi, contextGuid, username, password);
+                authService = new AuthServiceImpl(infraApi, username, password);
             }
         }
 
@@ -146,9 +134,7 @@ public class BimPortalClientBuilder {
      * @return Client configured for public access
      */
     public static EnhancedBimPortalClient buildPublicAccess() {
-        return new BimPortalClientBuilder()
-                .withContextGuid(BimPortalConfig.PUBLIC_RESOURCE_GUID)
-                .build();
+        return new BimPortalClientBuilder().build();
     }
 
     /**
@@ -187,10 +173,6 @@ public class BimPortalClientBuilder {
             throw new IllegalStateException("Base URL must start with http:// or https://");
         }
 
-        if (contextGuid == null || contextGuid.trim().isEmpty()) {
-            throw new IllegalStateException("Context GUID cannot be null or empty");
-        }
-
         // Validate credentials if provided
         if (!useDefaultCredentials) {
             if (username == null || username.trim().isEmpty()) {
@@ -208,7 +190,6 @@ public class BimPortalClientBuilder {
     public void displayConfiguration() {
         System.out.println("--- Builder Configuration ---");
         System.out.println("Base URL:     " + baseUrl);
-        System.out.println("Context GUID: " + contextGuid);
 
         if (useDefaultCredentials) {
             System.out.println("Credentials:  From environment");

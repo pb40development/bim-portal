@@ -64,16 +64,15 @@ public class EnhancedBimPortalClient {
         this.aiaFilterApi = apiClient.buildClient(AiaFilterApi.class);
         this.infraApi = apiClient.buildClient(InfrastrukturApi.class);
 
-        logger.info("Enhanced BIM Portal client initialized with context: {}", authService.getContextGuid());
     }
 
     /**
      * Constructor using default authentication from configuration.
      */
-    public EnhancedBimPortalClient(String contextGuid) {
+    public EnhancedBimPortalClient() {
         this.apiClient = createConfiguredApiClient();
         this.infraApi = apiClient.buildClient(InfrastrukturApi.class);
-        this.authService = new AuthServiceImpl(infraApi, contextGuid);
+        this.authService = new AuthServiceImpl(infraApi);
 
         // Initialize remaining API clients
         this.projectsApi = apiClient.buildClient(AiaProjekteApi.class);
@@ -88,12 +87,6 @@ public class EnhancedBimPortalClient {
         logger.info("Enhanced BIM Portal client initialized with default config");
     }
 
-    /**
-     * Default constructor using default context GUID.
-     */
-    public EnhancedBimPortalClient() {
-        this(BimPortalConfig.DEFAULT_AUTH_GUID);
-    }
 
 
     /**
