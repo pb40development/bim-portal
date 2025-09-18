@@ -16,7 +16,7 @@ BIM_PORTAL_PASSWORD=your_password
 ### 2. See It Work 
 ```bash
 # From project root - full feature showcase
-./gradlew runAllExportExamples
+./gradlew runAllExamples
 
 # Basic demo
 ./gradlew :bim-portal-enhanced:quickStart
@@ -206,13 +206,13 @@ LOG_LEVEL=DEBUG
 ## 🏆 Success Pattern
 
 1. **Start with health check**: `./gradlew :bim-portal-enhanced:healthCheck`
-2. **Run full demo**: `./gradlew runAllExportExamples`
+2. **Run full demo**: `./gradlew runAllExamples`
 3. **Try individual examples** that match your hackathon idea
 4. **Copy example code** and adapt for your project
 5. **Iterate and build** your awesome BIM solution!
 
 ---
 
-**Ready to hack? Start with `./gradlew runAllExportExamples` to see everything! 🚀**
+**Ready to hack? Start with `./gradlew runAllExamples` to see everything! 🚀**
 
 **Questions?** Check the [main project README](../README.md) for project overview.

@@ -9,11 +9,14 @@ import com.bimportal.client.model.UserLoginPublicDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Optional;
+import java.util.UUID;
+
 /**
  * Implementation of AuthService for BIM Portal API authentication.
  *
  * This class handles the complete authentication lifecycle including
- * login, token management, refresh, and logout operations.
+ * login, token management, refresh, logout, and user UUID extraction.
  */
 public class AuthServiceImpl implements AuthService {
 
@@ -33,7 +36,6 @@ public class AuthServiceImpl implements AuthService {
      * @param password Password for authentication
      */
     public AuthServiceImpl(InfrastrukturApi infraApi, String contextGuid, String username, String password) {
-//        this.infraApi = infraApi;
         this.infraApi = ApiClientFactory.createInfrastrukturApi();
         this.contextGuid = contextGuid != null ? contextGuid : BimPortalConfig.DEFAULT_AUTH_GUID;
         this.username = username;
@@ -73,7 +75,15 @@ public class AuthServiceImpl implements AuthService {
 
             if (tokenResponse != null && tokenResponse.getToken() != null) {
                 tokenManager.storeTokens(tokenResponse);
-                logger.info("Login successful. Token received.");
+
+                // Log user UUID extraction result
+                Optional<UUID> userId = tokenManager.getCurrentUserId();
+                if (userId.isPresent()) {
+                    logger.info("Login successful. Token received. User UUID: {}", userId.get());
+                } else {
+                    logger.info("Login successful. Token received. User UUID: not available");
+                }
+
                 return tokenResponse;
             } else {
                 logger.error("Login failed: No token in response");
@@ -85,9 +95,6 @@ public class AuthServiceImpl implements AuthService {
             throw new AuthenticationException("Login failed: " + e.getMessage(), e);
         }
     }
-
-
-
 
     @Override
     public JWTTokenPublicDto login() throws AuthenticationException {
@@ -222,6 +229,33 @@ public class AuthServiceImpl implements AuthService {
     }
 
     /**
+     * Get the current user UUID extracted from the JWT token.
+     * @return User UUID or empty if not authenticated or not available
+     */
+    public Optional<UUID> getCurrentUserId() {
+        return tokenManager.getCurrentUserId();
+    }
+
+    /**
+     * Get the current user UUID, throwing an exception if not available.
+     * @return User UUID
+     * @throws AuthenticationException if not authenticated or user UUID not available
+     */
+    public UUID getCurrentUserIdRequired() throws AuthenticationException {
+        return getCurrentUserId()
+                .orElseThrow(() -> new AuthenticationException(
+                        "User UUID not available. Please ensure you are authenticated and the JWT token contains user information."));
+    }
+
+    /**
+     * Check if current user UUID is available.
+     * @return True if user UUID is available
+     */
+    public boolean hasCurrentUserId() {
+        return getCurrentUserId().isPresent();
+    }
+
+    /**
      * Get token status for debugging.
      * @return Current token status
      */
@@ -236,5 +270,13 @@ public class AuthServiceImpl implements AuthService {
     public void forceTokenRefresh() throws AuthenticationException {
         tokenManager.clearTokens();
         getValidToken();
+    }
+
+    /**
+     * Get the TokenManager instance for advanced operations.
+     * @return TokenManager instance
+     */
+    protected TokenManager getTokenManager() {
+        return tokenManager;
     }
 }

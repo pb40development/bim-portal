@@ -8,8 +8,12 @@ import com.bimportal.client.model.*;
 // Import enhanced client classes
 import com.pb40.bimportal.auth.AuthService;
 import com.pb40.bimportal.auth.AuthServiceImpl;
+import com.pb40.bimportal.auth.AuthenticationException;
 import com.pb40.bimportal.config.BimPortalConfig;
 import com.bimportal.client.model.OrganisationForPublicDTO;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.Collections;
 
 // Add SLF4J imports
 import org.slf4j.Logger;
@@ -18,9 +22,8 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Enhanced BIM Portal client with improved binary response handling.
@@ -91,6 +94,15 @@ public class EnhancedBimPortalClient {
      */
     public EnhancedBimPortalClient() {
         this(BimPortalConfig.DEFAULT_AUTH_GUID);
+    }
+
+
+    /**
+     * Get the authentication service instance.
+     * @return AuthService instance
+     */
+    public AuthService getAuthService() {
+        return authService;
     }
 
     /**
@@ -214,30 +226,30 @@ public class EnhancedBimPortalClient {
         }
     }
 
-    /**
-     * Get organizations where the specified user is a member.
-     * Requires authentication.
-     * @param userId UUID of the user
-     * @return List of user's organizations
-     * @throws RuntimeException if the operation fails
-     */
-    public List<OrganisationForPublicDTO> getUserOrganisations(UUID userId) {
-        if (userId == null) {
-            throw new IllegalArgumentException("User ID cannot be null");
-        }
-        if (!isAuthenticated()) {
-            throw new RuntimeException("Authentication required to fetch user organizations");
-        }
-        try {
-            logger.debug("Fetching organizations for user: {}", userId);
-            List<OrganisationForPublicDTO> userOrganizations = infraApi.getOrganisationsOfUser(userId);
-            logger.info("Successfully retrieved {} organizations for user {}", userOrganizations.size(), userId);
-            return userOrganizations;
-        } catch (Exception e) {
-            logger.error("Failed to fetch organizations for user: {}", userId, e);
-            throw new RuntimeException("Failed to fetch user organizations: " + e.getMessage(), e);
-        }
-    }
+//    /**
+//     * Get organizations where the specified user is a member.
+//     * Requires authentication.
+//     * @param userId UUID of the user
+//     * @return List of user's organizations
+//     * @throws RuntimeException if the operation fails
+//     */
+//    public List<OrganisationForPublicDTO> getUserOrganisations(UUID userId) {
+//        if (userId == null) {
+//            throw new IllegalArgumentException("User ID cannot be null");
+//        }
+//        if (!isAuthenticated()) {
+//            throw new RuntimeException("Authentication required to fetch user organizations");
+//        }
+//        try {
+//            logger.debug("Fetching organizations for user: {}", userId);
+//            List<OrganisationForPublicDTO> userOrganizations = infraApi.getOrganisationsOfUser(userId);
+//            logger.info("Successfully retrieved {} organizations for user {}", userOrganizations.size(), userId);
+//            return userOrganizations;
+//        } catch (Exception e) {
+//            logger.error("Failed to fetch organizations for user: {}", userId, e);
+//            throw new RuntimeException("Failed to fetch user organizations: " + e.getMessage(), e);
+//        }
+//    }
 
     /**
      * Get organizations where the current authenticated user is a member.
@@ -319,47 +331,47 @@ public class EnhancedBimPortalClient {
      * @param queryParams Query parameters for filtering organizations
      * @return List of organizations matching the criteria
      * @throws RuntimeException if the operation fails
-     */
-    public List<OrganisationForPublicDTO> getUserOrganisationsWithParams(InfrastrukturApi.GetOrganisationsOfUserQueryParams queryParams) {
-        if (queryParams == null) {
-            throw new IllegalArgumentException("Query parameters cannot be null");
-        }
-        if (!isAuthenticated()) {
-            throw new RuntimeException("Authentication required to fetch user organizations");
-        }
-        try {
-            logger.debug("Fetching organizations with query parameters");
-            List<OrganisationForPublicDTO> organizations = infraApi.getOrganisationsOfUser(queryParams);
-            logger.info("Successfully retrieved {} organizations with query parameters", organizations.size());
-            return organizations;
-        } catch (Exception e) {
-            logger.error("Failed to fetch organizations with query parameters", e);
-            throw new RuntimeException("Failed to fetch organizations with query parameters: " + e.getMessage(), e);
-        }
-    }
+    //     */
+//    public List<OrganisationForPublicDTO> getUserOrganisationsWithParams(InfrastrukturApi.GetOrganisationsOfUserQueryParams queryParams) {
+//        if (queryParams == null) {
+//            throw new IllegalArgumentException("Query parameters cannot be null");
+//        }
+//        if (!isAuthenticated()) {
+//            throw new RuntimeException("Authentication required to fetch user organizations");
+//        }
+//        try {
+//            logger.debug("Fetching organizations with query parameters");
+//            List<OrganisationForPublicDTO> organizations = infraApi.getOrganisationsOfUser(queryParams);
+//            logger.info("Successfully retrieved {} organizations with query parameters", organizations.size());
+//            return organizations;
+//        } catch (Exception e) {
+//            logger.error("Failed to fetch organizations with query parameters", e);
+//            throw new RuntimeException("Failed to fetch organizations with query parameters: " + e.getMessage(), e);
+//        }
+//    }
 
     /**
      * Create query parameters for fetching user organizations.
      * @param userId UUID of the user
      * @return Configured query parameters
      */
-    public InfrastrukturApi.GetOrganisationsOfUserQueryParams createUserOrganisationQueryParams(UUID userId) {
-        return new InfrastrukturApi.GetOrganisationsOfUserQueryParams().userId(userId);
-    }
+//    public InfrastrukturApi.GetOrganisationsOfUserQueryParams createUserOrganisationQueryParams(UUID userId) {
+//        return new InfrastrukturApi.GetOrganisationsOfUserQueryParams().userId(userId);
+//    }
 
     /**
      * Get organizations count for a user.
      * @param userId UUID of the user
      * @return Number of organizations the user is a member of
      */
-    public int getUserOrganisationsCount(UUID userId) {
-        try {
-            return getUserOrganisations(userId).size();
-        } catch (Exception e) {
-            logger.warn("Failed to get organization count for user: {}", userId, e);
-            return 0;
-        }
-    }
+//    public int getUserOrganisationsCount(UUID userId) {
+//        try {
+//            return getUserOrganisations(userId).size();
+//        } catch (Exception e) {
+//            logger.warn("Failed to get organization count for user: {}", userId, e);
+//            return 0;
+//        }
+//    }
 
     /**
      * Check if any organizations are available.
@@ -379,16 +391,232 @@ public class EnhancedBimPortalClient {
      * @param userId UUID of the user
      * @return List of organization names the user is a member of
      */
+//    public List<String> getUserOrganisationNames(UUID userId) {
+//        try {
+//            return getUserOrganisations(userId).stream()
+//                    .map(OrganisationForPublicDTO::getName)
+//                    .filter(name -> name != null && !name.trim().isEmpty())
+//                    .toList();
+//        } catch (Exception e) {
+//            logger.warn("Failed to get organization names for user: {}", userId, e);
+//            return List.of();
+//        }
+//    }
+
+    // Add these methods to your existing EnhancedBimPortalClient class
+
+    /**
+     * Get organizations for the current authenticated user.
+     * Automatically extracts user UUID from JWT token.
+     * @return List of user organizations
+     * @throws RuntimeException if not authenticated or user UUID not available
+     */
+    public List<OrganisationForPublicDTO> getCurrentUserOrganisations() {
+        AuthService authService = getAuthService();
+        if (!(authService instanceof AuthServiceImpl)) {
+            throw new RuntimeException("Enhanced auth service not available for user UUID extraction");
+        }
+
+        AuthServiceImpl authServiceImpl = (AuthServiceImpl) authService;
+        try {
+            UUID currentUserId = authServiceImpl.getCurrentUserIdRequired();
+            return getUserOrganisations(currentUserId);
+        } catch (AuthenticationException e) {
+            throw new RuntimeException("Failed to get current user organizations: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Get organizations for a specific user by UUID.
+     * @param userId User UUID
+     * @return List of organizations for the user
+     */
+    public List<OrganisationForPublicDTO> getUserOrganisations(UUID userId) {
+        try {
+            InfrastrukturApi.GetOrganisationsOfUserQueryParams params = createUserOrganisationQueryParams(userId);
+            return getUserOrganisationsWithParams(params);
+        } catch (Exception e) {
+            logger.error("Error getting user organizations for user {}: {}", userId, e.getMessage());
+            throw new RuntimeException("Failed to get user organizations: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Get organizations for a user using query parameters.
+     * @param queryParams Query parameters containing user ID
+     * @return List of organizations for the user
+     */
+    public List<OrganisationForPublicDTO> getUserOrganisationsWithParams(
+            InfrastrukturApi.GetOrganisationsOfUserQueryParams queryParams) {
+        try {
+            return infraApi.getOrganisationsOfUser(queryParams);
+        } catch (Exception e) {
+            logger.error("Error calling user organizations API: {}", e.getMessage());
+            throw new RuntimeException("Failed to call user organizations API: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Create query parameters for user organization requests.
+     * @param userId User UUID
+     * @return Query parameters object
+     */
+    public InfrastrukturApi.GetOrganisationsOfUserQueryParams createUserOrganisationQueryParams(UUID userId) {
+        return new InfrastrukturApi.GetOrganisationsOfUserQueryParams().userId(userId);
+    }
+
+    /**
+     * Check if a user is a member of a specific organization.
+     * @param userId User UUID
+     * @param organizationGuid Organization GUID
+     * @return True if user is a member of the organization
+     */
+    public boolean isUserMemberOfOrganisation(UUID userId, UUID organizationGuid) {
+        try {
+            List<OrganisationForPublicDTO> userOrgs = getUserOrganisations(userId);
+            return userOrgs.stream()
+                    .anyMatch(org -> org.getGuid().equals(organizationGuid));
+        } catch (Exception e) {
+            logger.error("Error checking organization membership for user {}: {}", userId, e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Check if the current user is a member of a specific organization.
+     * @param organizationGuid Organization GUID
+     * @return True if current user is a member of the organization
+     */
+    public boolean isCurrentUserMemberOfOrganisation(UUID organizationGuid) {
+        try {
+            List<OrganisationForPublicDTO> userOrgs = getCurrentUserOrganisations();
+            return userOrgs.stream()
+                    .anyMatch(org -> org.getGuid().equals(organizationGuid));
+        } catch (Exception e) {
+            logger.error("Error checking organization membership for current user: {}", e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Get count of organizations for a specific user.
+     * @param userId User UUID
+     * @return Number of organizations the user belongs to
+     */
+    public int getUserOrganisationsCount(UUID userId) {
+        try {
+            return getUserOrganisations(userId).size();
+        } catch (Exception e) {
+            logger.error("Error getting organization count for user {}: {}", userId, e.getMessage());
+            return 0;
+        }
+    }
+
+    /**
+     * Get count of organizations for the current user.
+     * @return Number of organizations the current user belongs to
+     */
+    public int getCurrentUserOrganisationsCount() {
+        try {
+            return getCurrentUserOrganisations().size();
+        } catch (Exception e) {
+            logger.error("Error getting organization count for current user: {}", e.getMessage());
+            return 0;
+        }
+    }
+
+    /**
+     * Get organization names for a specific user.
+     * @param userId User UUID
+     * @return List of organization names
+     */
     public List<String> getUserOrganisationNames(UUID userId) {
         try {
             return getUserOrganisations(userId).stream()
                     .map(OrganisationForPublicDTO::getName)
-                    .filter(name -> name != null && !name.trim().isEmpty())
-                    .toList();
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
         } catch (Exception e) {
-            logger.warn("Failed to get organization names for user: {}", userId, e);
-            return List.of();
+            logger.error("Error getting organization names for user {}: {}", userId, e.getMessage());
+            return Collections.emptyList();
         }
+    }
+
+    /**
+     * Get organization names for the current user.
+     * @return List of organization names for current user
+     */
+    public List<String> getCurrentUserOrganisationNames() {
+        try {
+            return getCurrentUserOrganisations().stream()
+                    .map(OrganisationForPublicDTO::getName)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            logger.error("Error getting organization names for current user: {}", e.getMessage());
+            return Collections.emptyList();
+        }
+    }
+
+    /**
+     * Get the first organization for a user (convenience method).
+     * @param userId User UUID
+     * @return First organization or empty if none found
+     */
+    public Optional<OrganisationForPublicDTO> getUserFirstOrganisation(UUID userId) {
+        try {
+            List<OrganisationForPublicDTO> orgs = getUserOrganisations(userId);
+            return orgs.isEmpty() ? Optional.empty() : Optional.of(orgs.get(0));
+        } catch (Exception e) {
+            logger.error("Error getting first organization for user {}: {}", userId, e.getMessage());
+            return Optional.empty();
+        }
+    }
+
+    /**
+     * Get the first organization for the current user (convenience method).
+     * @return First organization for current user or empty if none found
+     */
+    public Optional<OrganisationForPublicDTO> getCurrentUserFirstOrganisation() {
+        try {
+            List<OrganisationForPublicDTO> orgs = getCurrentUserOrganisations();
+            return orgs.isEmpty() ? Optional.empty() : Optional.of(orgs.get(0));
+        } catch (Exception e) {
+            logger.error("Error getting first organization for current user: {}", e.getMessage());
+            return Optional.empty();
+        }
+    }
+
+    /**
+     * Get current user UUID from JWT token.
+     * @return Current user UUID or empty if not available
+     */
+    public Optional<UUID> getCurrentUserId() {
+        AuthService authService = getAuthService();
+        if (authService instanceof AuthServiceImpl) {
+            AuthServiceImpl authServiceImpl = (AuthServiceImpl) authService;
+            return authServiceImpl.getCurrentUserId();
+        }
+        return Optional.empty();
+    }
+
+    /**
+     * Get current user UUID from JWT token, throwing exception if not available.
+     * @return Current user UUID
+     * @throws RuntimeException if user UUID not available
+     */
+    public UUID getCurrentUserIdRequired() {
+        return getCurrentUserId()
+                .orElseThrow(() -> new RuntimeException(
+                        "Current user UUID not available. Ensure authentication and JWT token contains user information."));
+    }
+
+    /**
+     * Check if current user UUID is available from JWT token.
+     * @return True if current user UUID is available
+     */
+    public boolean hasCurrentUserId() {
+        return getCurrentUserId().isPresent();
     }
 
 

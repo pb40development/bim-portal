@@ -54,7 +54,7 @@ BIM_PORTAL_PASSWORD=your_password
 **Full Feature Showcase**:
 ```bash
 ./gradlew :bim-portal-enhanced:quickStart
-./gradlew runAllExportExamples
+./gradlew runAllExamples
 ```
 
 ## 🎯 What You Get
@@ -115,7 +115,7 @@ if (exportableProject.isPresent()) {
 ./gradlew :bim-portal-enhanced:healthCheck
 
 # Run comprehensive examples
-./gradlew runAllExportExamples
+./gradlew runAllExamples
 
 # Explore available API methods
 ./gradlew :bim-portal-enhanced:checkApiMethods

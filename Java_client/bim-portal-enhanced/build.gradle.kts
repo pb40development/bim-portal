@@ -115,7 +115,7 @@ tasks.register<JavaExec>("searchExamples") {
     mainClass.set("com.pb40.bimportal.examples.SearchExample")
 }
 
-tasks.register<JavaExec>("organizationExample") {
+tasks.register<JavaExec>("organizationExamples") {
     group = "examples"
     description = "Run organizationexamples"
     classpath = sourceSets.main.get().runtimeClasspath
@@ -123,7 +123,7 @@ tasks.register<JavaExec>("organizationExample") {
 }
 
 // Convenience task to run all export examples
-tasks.register("runAllExportExamples") {
+tasks.register("runAllExamples") {
     group = "examples"
     description = "Run all export examples sequentially"
     dependsOn(
@@ -134,7 +134,7 @@ tasks.register("runAllExportExamples") {
         "exportTemplates",
         "batchExport",
         "searchExamples",
-        "organizationExample"
+        "organizationExamples"
     )
 
     doLast {

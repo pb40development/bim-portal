@@ -5,30 +5,38 @@ import com.bimportal.client.model.JWTTokenPublicDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.time.*;
-import java.time.format.DateTimeFormatter;
+import java.time.Instant;
 import java.util.Base64;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Thread-safe JWT token manager for BIM Portal authentication.
  *
- * Handles token storage, validation, and expiration checking.
+ * Handles token storage, validation, expiration checking, and user UUID extraction.
  */
 public class TokenManager {
 
     private static final Logger logger = LoggerFactory.getLogger(TokenManager.class);
 
+    // Patterns for extracting claims from JWT payload
+    private static final Pattern USER_ID_PATTERN = Pattern.compile("\"(?:sub|userId|user_id|id)\"\\s*:\\s*\"([^\"]+)\"");
+    private static final Pattern EXP_PATTERN = Pattern.compile("\"exp\"\\s*:\\s*(\\d+)");
+
     private volatile String accessToken;
     private volatile String refreshToken;
     private volatile Instant tokenExpiresAt;
+    private volatile UUID currentUserId;
 
     private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
     private final ReentrantReadWriteLock.ReadLock readLock = lock.readLock();
     private final ReentrantReadWriteLock.WriteLock writeLock = lock.writeLock();
 
     /**
-     * Store tokens from authentication response.
+     * Store tokens from authentication response and extract user information.
      * @param tokenResponse JWT token response from API
      */
     public void storeTokens(JWTTokenPublicDto tokenResponse) {
@@ -41,18 +49,35 @@ public class TokenManager {
         try {
             this.accessToken = tokenResponse.getToken();
             this.refreshToken = tokenResponse.getRefreshToken();
-            this.tokenExpiresAt = parseTokenExpiration(tokenResponse.getToken());
 
-            //Instant etcExpiration = this.tokenExpiresAt.atZone(ZoneOffset.UTC)
-             /////       .withZoneSameInstant(ZoneId.of("Europe/Paris")) // CET timezone
-                 //   .toInstant();
-            //logger.info("Tokens stored successfully. Expires at: {}", etcExpiration);
-            ZonedDateTime cetTime = this.tokenExpiresAt.atZone(ZoneOffset.UTC)
-                    .withZoneSameInstant(ZoneId.of("Europe/Paris"));
+            // Extract user UUID from JWT token
+            this.currentUserId = extractUserIdFromToken(tokenResponse.getToken());
 
-//            logger.info("Tokens stored successfully. Expires at: {}", cetTime);
-// or format it nicely:
-            logger.info("Tokens stored successfully. Expires at: {}", cetTime.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+            // First try to use validTill from the response if available
+            if (tokenResponse.getValidTill() != null) {
+                // The validTill field contains the actual expiration time
+                this.tokenExpiresAt = tokenResponse.getValidTill().toInstant();
+                logger.info("Using validTill from response. Token expires at: {}", tokenExpiresAt);
+            } else {
+                // Fallback to parsing the JWT token itself
+                this.tokenExpiresAt = parseTokenExpiration(tokenResponse.getToken());
+                logger.info("Parsed expiration from JWT. Token expires at: {}", tokenExpiresAt);
+            }
+
+            // Log token validity duration for debugging
+            if (tokenExpiresAt != null) {
+                long secondsUntilExpiry = tokenExpiresAt.getEpochSecond() - Instant.now().getEpochSecond();
+                logger.debug("Token valid for {} seconds (~{} minutes)",
+                        secondsUntilExpiry, secondsUntilExpiry / 60);
+            }
+
+            // Log user information
+            if (currentUserId != null) {
+                logger.info("Extracted user UUID from token: {}", currentUserId);
+            } else {
+                logger.warn("Could not extract user UUID from JWT token");
+            }
+
         } finally {
             writeLock.unlock();
         }
@@ -66,11 +91,12 @@ public class TokenManager {
         readLock.lock();
         try {
             if (accessToken == null) {
+                logger.debug("No access token available");
                 return null;
             }
 
             if (isTokenExpiring()) {
-                logger.debug("Access token is expiring soon");
+                logger.debug("Access token is expiring soon or expired");
                 return null;
             }
 
@@ -94,6 +120,19 @@ public class TokenManager {
     }
 
     /**
+     * Get the current user UUID extracted from the JWT token.
+     * @return User UUID or empty if not available
+     */
+    public Optional<UUID> getCurrentUserId() {
+        readLock.lock();
+        try {
+            return Optional.ofNullable(currentUserId);
+        } finally {
+            readLock.unlock();
+        }
+    }
+
+    /**
      * Check if the current token is expiring soon.
      * @return True if token will expire within the configured margin
      */
@@ -101,11 +140,22 @@ public class TokenManager {
         readLock.lock();
         try {
             if (tokenExpiresAt == null) {
+                logger.debug("No expiration time set - treating as expired");
                 return true;
             }
 
-            Instant refreshThreshold = Instant.now().plus(BimPortalConfig.TOKEN_REFRESH_MARGIN);
-            return tokenExpiresAt.isBefore(refreshThreshold);
+            Instant now = Instant.now();
+            Instant refreshThreshold = now.plus(BimPortalConfig.TOKEN_REFRESH_MARGIN);
+
+            boolean expiring = tokenExpiresAt.isBefore(refreshThreshold);
+
+            if (expiring) {
+                long secondsUntilExpiry = tokenExpiresAt.getEpochSecond() - now.getEpochSecond();
+                logger.debug("Token expiring: {} seconds remaining (refresh margin: {} seconds)",
+                        secondsUntilExpiry, BimPortalConfig.TOKEN_REFRESH_MARGIN.getSeconds());
+            }
+
+            return expiring;
         } finally {
             readLock.unlock();
         }
@@ -125,7 +175,7 @@ public class TokenManager {
     }
 
     /**
-     * Clear all stored tokens.
+     * Clear all stored tokens and user information.
      */
     public void clearTokens() {
         writeLock.lock();
@@ -133,14 +183,68 @@ public class TokenManager {
             this.accessToken = null;
             this.refreshToken = null;
             this.tokenExpiresAt = null;
-            logger.info("All tokens cleared");
+            this.currentUserId = null;
+            logger.info("All tokens and user information cleared");
         } finally {
             writeLock.unlock();
         }
     }
 
     /**
+     * Extract user UUID from JWT token payload.
+     * Looks for common user ID claims: sub, userId, user_id, id
+     * @param token JWT token
+     * @return User UUID or null if not found or parsing fails
+     */
+    private UUID extractUserIdFromToken(String token) {
+        if (token == null || token.trim().isEmpty()) {
+            return null;
+        }
+
+        try {
+            String[] parts = token.split("\\.");
+            if (parts.length < 2) {
+                logger.warn("Invalid JWT token format for user ID extraction");
+                return null;
+            }
+
+            // Decode the payload (second part of JWT)
+            String payload = new String(Base64.getUrlDecoder().decode(parts[1]));
+            logger.debug("JWT payload for user extraction: {}", payload);
+
+            // Try to find user ID in common claim names
+            Matcher matcher = USER_ID_PATTERN.matcher(payload);
+            if (matcher.find()) {
+                String userIdString = matcher.group(1);
+                logger.debug("Found user ID string in JWT: {}", userIdString);
+
+                try {
+                    // Try to parse as UUID
+                    UUID userId = UUID.fromString(userIdString);
+                    logger.info("Successfully extracted user UUID: {}", userId);
+                    return userId;
+                } catch (IllegalArgumentException e) {
+                    logger.warn("User ID found in JWT is not a valid UUID: {}", userIdString);
+                    // Could return null or try other approaches
+                    return null;
+                }
+            } else {
+                logger.warn("No user ID claim found in JWT payload. Checked for: sub, userId, user_id, id");
+
+                // Log available claims for debugging
+                logAvailableClaims(payload);
+                return null;
+            }
+
+        } catch (Exception e) {
+            logger.warn("Failed to extract user ID from JWT: {}", e.getMessage());
+            return null;
+        }
+    }
+
+    /**
      * Parse JWT token expiration from token payload.
+     * This is a fallback method when validTill is not available in the response.
      * @param token JWT token
      * @return Expiration instant or null if parsing fails
      */
@@ -156,41 +260,50 @@ public class TokenManager {
                 return null;
             }
 
+            // Decode the payload (second part of JWT)
             String payload = new String(Base64.getUrlDecoder().decode(parts[1]));
+            logger.debug("JWT payload: {}", payload);
 
-            // Simple JSON parsing for exp claim
-            int expIndex = payload.indexOf("\"exp\":");
-            if (expIndex == -1) {
+            // Use pattern matching for more reliable extraction
+            Matcher matcher = EXP_PATTERN.matcher(payload);
+            if (matcher.find()) {
+                String expValue = matcher.group(1);
+                long expirationSeconds = Long.parseLong(expValue);
+
+                Instant expiration = Instant.ofEpochSecond(expirationSeconds);
+                logger.debug("Parsed token expiration from JWT exp claim: {}", expiration);
+
+                return expiration;
+            } else {
                 logger.warn("No exp claim found in JWT token");
                 return null;
             }
 
-            String expPart = payload.substring(expIndex + 6);
-            int commaIndex = expPart.indexOf(",");
-            int braceIndex = expPart.indexOf("}");
-
-            int endIndex = -1;
-            if (commaIndex != -1 && braceIndex != -1) {
-                endIndex = Math.min(commaIndex, braceIndex);
-            } else if (commaIndex != -1) {
-                endIndex = commaIndex;
-            } else if (braceIndex != -1) {
-                endIndex = braceIndex;
-            }
-
-            if (endIndex == -1) {
-                logger.warn("Could not parse exp claim");
-                return null;
-            }
-
-            String expValue = expPart.substring(0, endIndex).trim();
-            long expirationSeconds = Long.parseLong(expValue);
-
-            return Instant.ofEpochSecond(expirationSeconds);
-
         } catch (Exception e) {
-            logger.warn("Failed to parse token expiration: {}", e.getMessage());
+            logger.warn("Failed to parse token expiration from JWT: {}", e.getMessage());
             return null;
+        }
+    }
+
+    /**
+     * Log available claims in JWT payload for debugging purposes.
+     * @param payload JWT payload JSON string
+     */
+    private void logAvailableClaims(String payload) {
+        try {
+            // Simple extraction of claim names for debugging
+            Pattern claimPattern = Pattern.compile("\"([^\"]+)\"\\s*:");
+            Matcher matcher = claimPattern.matcher(payload);
+            StringBuilder claims = new StringBuilder();
+            while (matcher.find()) {
+                if (claims.length() > 0) {
+                    claims.append(", ");
+                }
+                claims.append(matcher.group(1));
+            }
+            logger.debug("Available claims in JWT: {}", claims.toString());
+        } catch (Exception e) {
+            logger.debug("Could not extract claim names for debugging", e);
         }
     }
 
@@ -205,17 +318,62 @@ public class TokenManager {
                 return "No token";
             }
 
+            StringBuilder status = new StringBuilder();
+
             if (tokenExpiresAt == null) {
-                return "Token available (expiration unknown)";
+                status.append("Token available (expiration unknown)");
+            } else {
+                long secondsRemaining = tokenExpiresAt.getEpochSecond() - Instant.now().getEpochSecond();
+
+                if (isTokenExpiring()) {
+                    status.append(String.format("Token expiring soon (expires in %d seconds at %s)",
+                            secondsRemaining, tokenExpiresAt));
+                } else {
+                    status.append(String.format("Token valid (expires in %d seconds at %s)",
+                            secondsRemaining, tokenExpiresAt));
+                }
             }
 
-            if (isTokenExpiring()) {
-                return "Token expiring soon (expires: " + tokenExpiresAt + ")";
+            // Add user information
+            if (currentUserId != null) {
+                status.append(", User ID: ").append(currentUserId);
+            } else {
+                status.append(", User ID: not available");
             }
 
-            return "Token valid (expires: " + tokenExpiresAt + ")";
+            return status.toString();
         } finally {
             readLock.unlock();
+        }
+    }
+
+    /**
+     * Manually set the token expiration time.
+     * This can be used when the actual expiration is known from other sources.
+     * @param expiresAt The expiration instant
+     */
+    public void setTokenExpiration(Instant expiresAt) {
+        writeLock.lock();
+        try {
+            this.tokenExpiresAt = expiresAt;
+            logger.info("Token expiration manually set to: {}", expiresAt);
+        } finally {
+            writeLock.unlock();
+        }
+    }
+
+    /**
+     * Manually set the current user ID.
+     * This can be used if the user ID is obtained from other sources.
+     * @param userId The user UUID
+     */
+    public void setCurrentUserId(UUID userId) {
+        writeLock.lock();
+        try {
+            this.currentUserId = userId;
+            logger.info("Current user ID manually set to: {}", userId);
+        } finally {
+            writeLock.unlock();
         }
     }
 }
