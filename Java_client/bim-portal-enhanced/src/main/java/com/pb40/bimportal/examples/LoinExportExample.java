@@ -19,7 +19,7 @@ import java.util.Optional;
  * LOIN export examples for BIM Portal Java client.
  *
  * Demonstrates LOIN export workflows in multiple formats including
- * PDF, OpenOffice, OKSTRA, LOIN-XML, and IDS.
+ * PDF, OpenOffice, OKSTRA, LOIN-XML, and IDS with automatic content type detection.
  */
 public class LoinExportExample {
 
@@ -38,6 +38,76 @@ public class LoinExportExample {
             return false;
         }
         return true;
+    }
+
+    /**
+     * Detect content type from byte array and return appropriate file extension.
+     * @param content The byte array content
+     * @param defaultExtension Default extension if detection fails
+     * @return Detected file extension
+     */
+    private static String detectFileExtension(byte[] content, String defaultExtension) {
+        if (content == null || content.length < 4) {
+            return defaultExtension;
+        }
+
+        // Check for ZIP file signature (PK)
+        if (content.length >= 2 && content[0] == 0x50 && content[1] == 0x4B) {
+            logger.debug("Detected ZIP file signature");
+            return "zip";
+        }
+
+        // Check for PDF signature (%PDF)
+        if (content.length >= 4 &&
+                content[0] == 0x25 && content[1] == 0x50 &&
+                content[2] == 0x44 && content[3] == 0x46) {
+            logger.debug("Detected PDF file signature");
+            return "pdf";
+        }
+
+        // Check for OpenDocument format (ZIP-based, but starts differently)
+        if (content.length >= 4 && content[0] == 0x50 && content[1] == 0x4B) {
+            // Additional check for OpenDocument by looking for mimetype file
+            // This is a more sophisticated check for ODT files
+            String contentStr = new String(content, 0, Math.min(1024, content.length));
+            if (contentStr.contains("mimetypeapplication/vnd.oasis.opendocument")) {
+                logger.debug("Detected OpenDocument format");
+                return "odt";
+            }
+            logger.debug("Detected ZIP-based format (possibly ODT or other)");
+            return "zip";
+        }
+
+        // Check for XML content (IDS files are typically XML)
+        if (content.length >= 5) {
+            String start = new String(content, 0, Math.min(100, content.length));
+            if (start.trim().startsWith("<?xml") || start.contains("<ids") || start.contains("<loin")) {
+                logger.debug("Detected XML format");
+                return "xml";
+            }
+        }
+
+        logger.debug("Could not detect file type, using default: {}", defaultExtension);
+        return defaultExtension;
+    }
+
+    /**
+     * Export content with automatic file type detection.
+     * @param content The byte array content
+     * @param baseFilename Base filename without extension
+     * @param expectedExtension Expected file extension for logging
+     * @return Optional path to saved file
+     */
+    private static Optional<Path> exportWithDetection(byte[] content, String baseFilename, String expectedExtension) {
+        String detectedExtension = detectFileExtension(content, expectedExtension);
+        String filename = baseFilename + "." + detectedExtension;
+
+        if (!detectedExtension.equals(expectedExtension)) {
+            logger.info("Content type detection: expected '{}' but detected '{}' for {}",
+                    expectedExtension, detectedExtension, baseFilename);
+        }
+
+        return ExportUtils.saveExportFile(content, filename);
     }
 
     /**
@@ -70,80 +140,97 @@ public class LoinExportExample {
 
             System.out.println("\n2️⃣ Exporting LOIN in multiple formats...");
 
-            // PDF Export
+            // PDF Export with auto-detection
             System.out.println("   📄 Exporting as PDF...");
             Optional<byte[]> pdfContent = client.exportLoinPdf(selectedLoin.getGuid());
             if (pdfContent.isPresent()) {
-                String filename = "loin_" + selectedLoin.getGuid() + ".pdf";
-                Optional<Path> pdfPath = ExportUtils.saveExportFile(pdfContent.get(), filename);
+                String baseFilename = "loin_pdf_" + selectedLoin.getGuid();
+                Optional<Path> pdfPath = exportWithDetection(pdfContent.get(), baseFilename, "pdf");
                 if (pdfPath.isPresent()) {
                     exportResults.put("PDF", pdfPath.get());
                     System.out.println("   ✅ PDF exported: " + pdfPath.get());
+                } else {
+                    System.out.println("   ❌ PDF export failed: Could not save file");
                 }
             } else {
-                System.out.println("   ❌ PDF export failed");
+                System.out.println("   ❌ PDF export failed: No content received");
             }
 
-            // OpenOffice Export
+            // OpenOffice Export with auto-detection
             System.out.println("   📝 Exporting as OpenOffice...");
             Optional<byte[]> odtContent = client.exportLoinOpenOffice(selectedLoin.getGuid());
             if (odtContent.isPresent()) {
-                String filename = "loin_" + selectedLoin.getGuid() + ".odt";
-                Optional<Path> odtPath = ExportUtils.saveExportFile(odtContent.get(), filename);
+                String baseFilename = "loin_odt_" + selectedLoin.getGuid();
+                Optional<Path> odtPath = exportWithDetection(odtContent.get(), baseFilename, "odt");
                 if (odtPath.isPresent()) {
                     exportResults.put("OpenOffice", odtPath.get());
                     System.out.println("   ✅ OpenOffice exported: " + odtPath.get());
+                } else {
+                    System.out.println("   ❌ OpenOffice export failed: Could not save file");
                 }
             } else {
-                System.out.println("   ❌ OpenOffice export failed");
+                System.out.println("   ❌ OpenOffice export failed: No content received");
             }
 
-            // OKSTRA Export
-            System.out.println("   🗗️ Exporting as OKSTRA...");
+            // OKSTRA Export with auto-detection
+            System.out.println("   🏗️ Exporting as OKSTRA...");
             Optional<byte[]> okstraContent = client.exportLoinOkstra(selectedLoin.getGuid());
             if (okstraContent.isPresent()) {
-                String filename = "loin_" + selectedLoin.getGuid() + ".zip";
-                Optional<Path> okstraPath = ExportUtils.saveExportFile(okstraContent.get(), filename);
+                String baseFilename = "loin_okstra_" + selectedLoin.getGuid();
+                Optional<Path> okstraPath = exportWithDetection(okstraContent.get(), baseFilename, "zip");
                 if (okstraPath.isPresent()) {
                     exportResults.put("OKSTRA", okstraPath.get());
                     System.out.println("   ✅ OKSTRA exported: " + okstraPath.get());
+                } else {
+                    System.out.println("   ❌ OKSTRA export failed: Could not save file");
                 }
             } else {
-                System.out.println("   ❌ OKSTRA export failed");
+                System.out.println("   ❌ OKSTRA export failed: No content received");
             }
 
-            // LOIN-XML Export
+            // LOIN-XML Export with auto-detection
             System.out.println("   🔗 Exporting as LOIN-XML...");
             Optional<byte[]> xmlContent = client.exportLoinXml(selectedLoin.getGuid());
             if (xmlContent.isPresent()) {
-                String filename = "loin_" + selectedLoin.getGuid() + ".xml";
-                Optional<Path> xmlPath = ExportUtils.saveExportFile(xmlContent.get(), filename);
+                String baseFilename = "loin_xml_" + selectedLoin.getGuid();
+                Optional<Path> xmlPath = exportWithDetection(xmlContent.get(), baseFilename, "xml");
                 if (xmlPath.isPresent()) {
                     exportResults.put("LOIN-XML", xmlPath.get());
                     System.out.println("   ✅ LOIN-XML exported: " + xmlPath.get());
+                } else {
+                    System.out.println("   ❌ LOIN-XML export failed: Could not save file");
                 }
             } else {
-                System.out.println("   ❌ LOIN-XML export failed");
+                System.out.println("   ❌ LOIN-XML export failed: No content received");
             }
 
-            // IDS Export
+            // IDS Export with auto-detection
             System.out.println("   🆔 Exporting as IDS...");
             Optional<byte[]> idsContent = client.exportLoinIds(selectedLoin.getGuid());
             if (idsContent.isPresent()) {
-                String filename = "loin_" + selectedLoin.getGuid() + ".ids";
-                Optional<Path> idsPath = ExportUtils.saveExportFile(idsContent.get(), filename);
+                String baseFilename = "loin_ids_" + selectedLoin.getGuid();
+                Optional<Path> idsPath = exportWithDetection(idsContent.get(), baseFilename, "ids");
                 if (idsPath.isPresent()) {
                     exportResults.put("IDS", idsPath.get());
                     System.out.println("   ✅ IDS exported: " + idsPath.get());
+                } else {
+                    System.out.println("   ❌ IDS export failed: Could not save file");
                 }
             } else {
-                System.out.println("   ❌ IDS export failed");
+                System.out.println("   ❌ IDS export failed: No content received");
             }
 
-            // Summary
+            // Summary with file type information
             System.out.println("\n📈 Export Summary: " + exportResults.size() + "/5 formats successful");
             for (Map.Entry<String, Path> entry : exportResults.entrySet()) {
-                System.out.println("   ✅ " + entry.getKey() + ": " + entry.getValue());
+                String filename = entry.getValue().getFileName().toString();
+                String extension = filename.substring(filename.lastIndexOf('.') + 1).toUpperCase();
+                System.out.println("   ✅ " + entry.getKey() + " (" + extension + "): " + entry.getValue());
+            }
+
+            if (exportResults.size() < 3) {
+                System.out.println("💡 Note: Some export formats may require special permissions or project setup");
+                System.out.println("💡 Content type detection helps ensure correct file extensions are used");
             }
 
         } catch (Exception e) {

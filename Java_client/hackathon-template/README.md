@@ -13,6 +13,7 @@ cp .env_example .env
 
 ### 2. Run Examples
 ```bash
+cd .. # To come back to project root directory
 # From project root
 ./gradlew :hackathon-template:runBasicExample    # Learn the API
 ./gradlew :hackathon-template:run                # Start building

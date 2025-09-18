@@ -142,10 +142,10 @@ tasks.register("runAllExamples") {
     }
 }
 
-// Resource processing
-tasks.processResources {
-    val projectProps = project.properties
-    filesMatching("application.properties") {
-        expand(projectProps)
-    }
-}
+//// Resource processing
+//tasks.processResources {
+//    val projectProps = project.properties
+//    filesMatching("application.properties") {
+//        expand(projectProps)
+//    }
+//}

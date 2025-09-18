@@ -60,11 +60,11 @@ tasks.register<JavaExec>("runBasicExample") {
 
 
 // Resource processing
-tasks.processResources {
-    filesMatching("application.properties") {
-        expand(project.properties)
-    }
-}
+//tasks.processResources {
+//    filesMatching("application.properties") {
+//        expand(project.properties)
+//    }
+//}
 
 tasks.test {
     useJUnitPlatform()

@@ -23,7 +23,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Enhanced BIM Portal client with improved binary response handling.
@@ -226,30 +225,7 @@ public class EnhancedBimPortalClient {
         }
     }
 
-//    /**
-//     * Get organizations where the specified user is a member.
-//     * Requires authentication.
-//     * @param userId UUID of the user
-//     * @return List of user's organizations
-//     * @throws RuntimeException if the operation fails
-//     */
-//    public List<OrganisationForPublicDTO> getUserOrganisations(UUID userId) {
-//        if (userId == null) {
-//            throw new IllegalArgumentException("User ID cannot be null");
-//        }
-//        if (!isAuthenticated()) {
-//            throw new RuntimeException("Authentication required to fetch user organizations");
-//        }
-//        try {
-//            logger.debug("Fetching organizations for user: {}", userId);
-//            List<OrganisationForPublicDTO> userOrganizations = infraApi.getOrganisationsOfUser(userId);
-//            logger.info("Successfully retrieved {} organizations for user {}", userOrganizations.size(), userId);
-//            return userOrganizations;
-//        } catch (Exception e) {
-//            logger.error("Failed to fetch organizations for user: {}", userId, e);
-//            throw new RuntimeException("Failed to fetch user organizations: " + e.getMessage(), e);
-//        }
-//    }
+
 
     /**
      * Get organizations where the current authenticated user is a member.
@@ -332,46 +308,8 @@ public class EnhancedBimPortalClient {
      * @return List of organizations matching the criteria
      * @throws RuntimeException if the operation fails
     //     */
-//    public List<OrganisationForPublicDTO> getUserOrganisationsWithParams(InfrastrukturApi.GetOrganisationsOfUserQueryParams queryParams) {
-//        if (queryParams == null) {
-//            throw new IllegalArgumentException("Query parameters cannot be null");
-//        }
-//        if (!isAuthenticated()) {
-//            throw new RuntimeException("Authentication required to fetch user organizations");
-//        }
-//        try {
-//            logger.debug("Fetching organizations with query parameters");
-//            List<OrganisationForPublicDTO> organizations = infraApi.getOrganisationsOfUser(queryParams);
-//            logger.info("Successfully retrieved {} organizations with query parameters", organizations.size());
-//            return organizations;
-//        } catch (Exception e) {
-//            logger.error("Failed to fetch organizations with query parameters", e);
-//            throw new RuntimeException("Failed to fetch organizations with query parameters: " + e.getMessage(), e);
-//        }
-//    }
 
-    /**
-     * Create query parameters for fetching user organizations.
-     * @param userId UUID of the user
-     * @return Configured query parameters
-     */
-//    public InfrastrukturApi.GetOrganisationsOfUserQueryParams createUserOrganisationQueryParams(UUID userId) {
-//        return new InfrastrukturApi.GetOrganisationsOfUserQueryParams().userId(userId);
-//    }
 
-    /**
-     * Get organizations count for a user.
-     * @param userId UUID of the user
-     * @return Number of organizations the user is a member of
-     */
-//    public int getUserOrganisationsCount(UUID userId) {
-//        try {
-//            return getUserOrganisations(userId).size();
-//        } catch (Exception e) {
-//            logger.warn("Failed to get organization count for user: {}", userId, e);
-//            return 0;
-//        }
-//    }
 
     /**
      * Check if any organizations are available.
@@ -386,22 +324,7 @@ public class EnhancedBimPortalClient {
         }
     }
 
-    /**
-     * Get organization names for a user.
-     * @param userId UUID of the user
-     * @return List of organization names the user is a member of
-     */
-//    public List<String> getUserOrganisationNames(UUID userId) {
-//        try {
-//            return getUserOrganisations(userId).stream()
-//                    .map(OrganisationForPublicDTO::getName)
-//                    .filter(name -> name != null && !name.trim().isEmpty())
-//                    .toList();
-//        } catch (Exception e) {
-//            logger.warn("Failed to get organization names for user: {}", userId, e);
-//            return List.of();
-//        }
-//    }
+
 
     // Add these methods to your existing EnhancedBimPortalClient class
 
@@ -771,7 +694,7 @@ public class EnhancedBimPortalClient {
             logger.debug("Attempting to export LOIN {} as PDF", loinGuid);
             byte[] pdfBytes = loinApi.exportPdf(loinGuid);
 
-            if (pdfBytes != null && pdfBytes.length > 0 && isPdfContent(pdfBytes)) {
+            if (pdfBytes != null && pdfBytes.length > 0 && isPdfOrZipContent(pdfBytes)) {
                 logger.debug("Successfully exported LOIN {} as PDF ({} bytes)", loinGuid, pdfBytes.length);
                 return Optional.of(pdfBytes);
             }
@@ -897,11 +820,11 @@ public class EnhancedBimPortalClient {
      */
     public Optional<byte[]> exportDomainModelPdf(UUID modelGuid) {
         try {
-            logger.debug("Attempting to export domain model {} as PDF", modelGuid);
+            logger.debug("Attempting to export domain model {} as PDF/ZIP", modelGuid);
             byte[] pdfBytes = domainModelsApi.exportPdf1(modelGuid);
 
-            if (pdfBytes != null && pdfBytes.length > 0 && isPdfContent(pdfBytes)) {
-                logger.debug("Successfully exported domain model {} as PDF ({} bytes)", modelGuid, pdfBytes.length);
+            if (pdfBytes != null && pdfBytes.length > 0 && isPdfOrZipContent(pdfBytes)) {
+                logger.debug("Successfully exported domain model {} as PDF/ZIP ({} bytes)", modelGuid, pdfBytes.length);
                 return Optional.of(pdfBytes);
             }
             return Optional.empty();
@@ -1171,7 +1094,7 @@ public class EnhancedBimPortalClient {
 
             if (pdfBytes != null && pdfBytes.length > 0) {
                 // Verify it's actually PDF content
-                if (isPdfContent(pdfBytes)) {
+                if (isPdfOrZipContent(pdfBytes)) {
                     logger.debug("Successfully exported project {} as PDF ({} bytes)", projectGuid, pdfBytes.length);
                     return Optional.of(pdfBytes);
                 } else {
@@ -1183,10 +1106,6 @@ public class EnhancedBimPortalClient {
             logger.warn("PDF export for project {} returned empty content", projectGuid);
             return Optional.empty();
 
-//        } catch (com.bimportal.client.decoder.BinaryResponseErrorDecoder.BinaryContentMisinterpretedException e) {
-//            // This exception indicates that the response was binary but treated as an error
-//            logger.warn("PDF export for project {} might have succeeded but was misinterpreted: {}", projectGuid, e.getMessage());
-//            return Optional.empty();
         } catch (Exception e) {
             // Handle other types of exceptions
             String errorMsg = e.getMessage();
@@ -1348,12 +1267,21 @@ public class EnhancedBimPortalClient {
     /**
      * Check if byte array contains PDF content.
      */
-    private boolean isPdfContent(byte[] data) {
+    private boolean isPdfOrZipContent(byte[] data) {
         if (data == null || data.length < 4) {
             return false;
         }
-        // PDF files start with %PDF
-        return data[0] == 0x25 && data[1] == 0x50 && data[2] == 0x44 && data[3] == 0x46;
+
+        // Accept both PDF and ZIP files
+        // PDF files start with %PDF (0x25 0x50 0x44 0x46)
+        boolean isPdf = data[0] == 0x25 && data[1] == 0x50 &&
+                data[2] == 0x44 && data[3] == 0x46;
+
+        // ZIP files start with PK (0x50 0x4B)
+        boolean isZip = data.length >= 2 &&
+                data[0] == 0x50 && data[1] == 0x4B;
+
+        return isPdf || isZip;
     }
 
     /**
