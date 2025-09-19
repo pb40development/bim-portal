@@ -46,9 +46,9 @@ def run_basic_property_examples(client: EnhancedBimPortalClient):
         print(f"An error occurred during property search: {e}")
 
     # Example 2: Search for properties with specific terms
-    print("\n2. Searching for properties containing 'IFC'...")
+    print("\n2. Searching for properties containing 'Abdeckung'...")
     try:
-        search_request = PropertyOrGroupForPublicRequest(searchString="IFC")
+        search_request = PropertyOrGroupForPublicRequest(searchString="Abdeckung")
         properties = client.search_properties(search_request)
         if properties:
             print(f"Found {len(properties)} properties containing 'IFC':")

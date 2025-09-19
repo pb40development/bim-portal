@@ -25,8 +25,8 @@ class BIMPortalConfig:
     """
     
     # --- API Configuration ---
-    BASE_URL: str = "https://via.bund.de/bim" # PROD
-    #BASE_URL: str = "https://via.bund.de/bmdv/bim-portal/edu/bim" #EDU -> for the Hackaton
+    #BASE_URL: str = "https://via.bund.de/bim" # PROD
+    BASE_URL: str = "https://via.bund.de/bmdv/bim-portal/edu/bim" #EDU -> for the Hackaton
 
     
     # Authentication endpoints (relative to BASE_URL)

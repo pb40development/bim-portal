@@ -51,9 +51,11 @@ conda activate bim-portal-hackathon
 
 ### 1. Setup Credentials
 ```bash
-python demo/credentials_setup.py
+cp .env_example .env
+# Edit .env with your credentials
+BIM_PORTAL_USERNAME="your-email@example.com"
+BIM_PORTAL_PASSWORD="your-secret-password"
 ```
-Enter your BIM Portal username and password when prompted.
 
 ### 2. Basic Usage
 ```python
