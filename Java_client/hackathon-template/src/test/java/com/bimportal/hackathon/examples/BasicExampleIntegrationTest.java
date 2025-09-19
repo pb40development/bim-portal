@@ -1,37 +1,39 @@
-//    * This test will systematically verify each search operation and help diagnose API discrepancies by
+//    * This test will systematically verify each search operation and help diagnose API
+// discrepancies by
 //    * for services with many optional query parameters.
 //    * however It requires valid authentication (in .env file) to run successfully.
 //    */
-//package com.bimportal.hackathon.examples;
+// package com.bimportal.hackathon.examples;
 //
-//import static org.junit.jupiter.api.Assertions.*;
-//import static org.junit.jupiter.api.Assumptions.assumeTrue;
+// import static org.junit.jupiter.api.Assertions.*;
+// import static org.junit.jupiter.api.Assumptions.assumeTrue;
 //
-//import com.bimportal.client.api.InfrastrukturApi;
-//import com.bimportal.client.model.*;
-//import com.pb40.bimportal.auth.AuthService;
-//import com.pb40.bimportal.auth.AuthServiceImpl;
-//import com.pb40.bimportal.client.ApiClientFactory;
-//import com.pb40.bimportal.client.BimPortalClientBuilder;
-//import com.pb40.bimportal.client.EnhancedBimPortalClient;
-//import java.util.*;
-//import java.util.concurrent.atomic.AtomicInteger;
-//import org.junit.jupiter.api.*;
-//import org.junit.jupiter.api.extension.ExtendWith;
-//import org.mockito.junit.jupiter.MockitoExtension;
-//import org.slf4j.Logger;
-//import org.slf4j.LoggerFactory;
+// import com.bimportal.client.api.InfrastrukturApi;
+// import com.bimportal.client.model.*;
+// import com.pb40.bimportal.auth.AuthService;
+// import com.pb40.bimportal.auth.AuthServiceImpl;
+// import com.pb40.bimportal.client.ApiClientFactory;
+// import com.pb40.bimportal.client.BimPortalClientBuilder;
+// import com.pb40.bimportal.client.EnhancedBimPortalClient;
+// import java.util.*;
+// import java.util.concurrent.atomic.AtomicInteger;
+// import org.junit.jupiter.api.*;
+// import org.junit.jupiter.api.extension.ExtendWith;
+// import org.mockito.junit.jupiter.MockitoExtension;
+// import org.slf4j.Logger;
+// import org.slf4j.LoggerFactory;
 //
-///**
+/// **
 // * Integration tests for BasicExample to identify and resolve search request data structure
 // * mismatches.
 // *
-// * <p>These tests systematically verify each search operation and help diagnose API discrepancies by
+// * <p>These tests systematically verify each search operation and help diagnose API discrepancies
+// by
 // * testing different request parameter combinations and analyzing response structures.
 // */
-//@ExtendWith(MockitoExtension.class)
-//@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-//public class BasicExampleIntegrationTest {
+// @ExtendWith(MockitoExtension.class)
+// @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+// public class BasicExampleIntegrationTest {
 //
 //  private static final Logger logger = LoggerFactory.getLogger(BasicExampleIntegrationTest.class);
 //
@@ -476,7 +478,8 @@
 //    try {
 //      System.out.println("  🔬 " + className + " Methods:");
 //      Arrays.stream(obj.getClass().getMethods())
-//          .filter(method -> method.getName().startsWith("get") || method.getName().startsWith("is"))
+//          .filter(method -> method.getName().startsWith("get") ||
+// method.getName().startsWith("is"))
 //          .filter(method -> method.getParameterCount() == 0)
 //          .sorted((a, b) -> a.getName().compareTo(b.getName()))
 //          .forEach(
@@ -568,4 +571,4 @@
 //      }
 //    }
 //  }
-//}
+// }

@@ -12,6 +12,7 @@
 *.xml
 # Project exclude paths
 /Java_client/.gradle/
+/Java_client/exports/
 /Java_client/bim-portal-enhanced/.gradle/
 /Java_client/bim-portal-enhanced/build/
 /Java_client/bim-portal-enhanced/build/classes/java/main/
