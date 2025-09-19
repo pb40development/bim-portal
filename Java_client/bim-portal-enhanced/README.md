@@ -13,7 +13,7 @@ BIM_PORTAL_USERNAME=your_email
 BIM_PORTAL_PASSWORD=your_password
 ```
 
-### 2. See It Work 
+### 2. See It Work
 ```bash
 # From project root - full feature showcase
 ./gradlew runAllExamples
@@ -22,7 +22,7 @@ BIM_PORTAL_PASSWORD=your_password
 ./gradlew :bim-portal-enhanced:quickStart
 ```
 
-### 3. Start Building 
+### 3. Start Building
 ```java
 // One-liner setup
 var client = BimPortalClientBuilder.buildDefault();
@@ -60,7 +60,7 @@ Run focused examples for specific BIM entity types:
 # Export projects in all available formats
 ./gradlew exportProjects
 
-# Export LOINs in all available formats  
+# Export LOINs in all available formats
 ./gradlew exportLoins
 
 # Export domain models
@@ -114,7 +114,7 @@ var client = BimPortalClientBuilder.buildDefault();
 
 // Search everything
 var projects = client.searchProjects();
-var loins = client.searchLoins(); 
+var loins = client.searchLoins();
 var domainModels = client.searchDomainModels();
 var properties = client.searchProperties();
 ```
@@ -143,7 +143,7 @@ var projects = client.searchProjects();
 for (var project : projects.subList(0, Math.min(5, projects.size()))) {
     var pdf = client.exportProjectPdf(project.getGuid());
     if (pdf.isPresent()) {
-        ExportUtils.saveExportFile(pdf.get(), 
+        ExportUtils.saveExportFile(pdf.get(),
             "project_" + project.getGuid() + ".pdf");
     }
 }

@@ -1,31 +1,27 @@
 package com.bimportal.client.api;
 
 import com.bimportal.client.ApiClient;
-import com.bimportal.client.EncodingUtils;
-import com.bimportal.client.model.ApiResponse;
-
 import com.bimportal.client.model.AIADomainSpecificModelPublicDto;
 import com.bimportal.client.model.AiaDomainSpecificModelForPublicRequest;
+import com.bimportal.client.model.ApiResponse;
 import com.bimportal.client.model.SimpleDomainSpecificModelPublicDto;
+import feign.*;
+import jakarta.validation.constraints.*;
+import java.util.List;
 import java.util.UUID;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import jakarta.validation.constraints.*;
-import jakarta.validation.Valid;
-
-import feign.*;
-
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-09-03T22:05:51.794303+02:00[Europe/Berlin]", comments = "Generator version: 7.9.0")
+@jakarta.annotation.Generated(
+    value = "org.openapitools.codegen.languages.JavaClientCodegen",
+    date = "2025-09-03T22:05:51.794303+02:00[Europe/Berlin]",
+    comments = "Generator version: 7.9.0")
 public interface FachmodelleApi extends ApiClient.Api {
 
-
   /**
-   * Liefert das Fachmodell als XML-Datei im IDS-Format zurück.
-   * Diese API erlaubt optional eine Authentifizierung mittels &#39;Bearer {accessToken}&#39; über den Authorization-Header, um nicht öffentlich sichtbare Informationselemente abrufen zu können.
-   * @param guid  (required)
+   * Liefert das Fachmodell als XML-Datei im IDS-Format zurück. Diese API erlaubt optional eine
+   * Authentifizierung mittels &#39;Bearer {accessToken}&#39; über den Authorization-Header, um
+   * nicht öffentlich sichtbare Informationselemente abrufen zu können.
+   *
+   * @param guid (required)
    * @return byte[]
    */
   @RequestLine("GET /aia/api/v1/public/domainSpecificModel/{guid}/IDS")
@@ -35,10 +31,12 @@ public interface FachmodelleApi extends ApiClient.Api {
   byte[] exportIds1(@Param("guid") UUID guid);
 
   /**
-   * Liefert das Fachmodell als XML-Datei im IDS-Format zurück.
-   * Similar to <code>exportIds1</code> but it also returns the http response headers .
-   * Diese API erlaubt optional eine Authentifizierung mittels &#39;Bearer {accessToken}&#39; über den Authorization-Header, um nicht öffentlich sichtbare Informationselemente abrufen zu können.
-   * @param guid  (required)
+   * Liefert das Fachmodell als XML-Datei im IDS-Format zurück. Similar to <code>exportIds1</code>
+   * but it also returns the http response headers . Diese API erlaubt optional eine
+   * Authentifizierung mittels &#39;Bearer {accessToken}&#39; über den Authorization-Header, um
+   * nicht öffentlich sichtbare Informationselemente abrufen zu können.
+   *
+   * @param guid (required)
    * @return A ApiResponse that wraps the response boyd and the http headers.
    */
   @RequestLine("GET /aia/api/v1/public/domainSpecificModel/{guid}/IDS")
@@ -47,12 +45,12 @@ public interface FachmodelleApi extends ApiClient.Api {
   })
   ApiResponse<byte[]> exportIds1WithHttpInfo(@Param("guid") UUID guid);
 
-
-
   /**
-   * Liefert das Fachmodell mit der übergebenen GUID im OpenOffice-Format zurück
-   * Diese API erlaubt optional eine Authentifizierung mittels &#39;Bearer {accessToken}&#39; über den Authorization-Header, um nicht öffentlich sichtbare Informationselemente abrufen zu können.
-   * @param guid  (required)
+   * Liefert das Fachmodell mit der übergebenen GUID im OpenOffice-Format zurück Diese API erlaubt
+   * optional eine Authentifizierung mittels &#39;Bearer {accessToken}&#39; über den
+   * Authorization-Header, um nicht öffentlich sichtbare Informationselemente abrufen zu können.
+   *
+   * @param guid (required)
    * @return byte[]
    */
   @RequestLine("GET /aia/api/v1/public/domainSpecificModel/{guid}/openOffice")
@@ -62,10 +60,12 @@ public interface FachmodelleApi extends ApiClient.Api {
   byte[] exportOdt1(@Param("guid") UUID guid);
 
   /**
-   * Liefert das Fachmodell mit der übergebenen GUID im OpenOffice-Format zurück
-   * Similar to <code>exportOdt1</code> but it also returns the http response headers .
-   * Diese API erlaubt optional eine Authentifizierung mittels &#39;Bearer {accessToken}&#39; über den Authorization-Header, um nicht öffentlich sichtbare Informationselemente abrufen zu können.
-   * @param guid  (required)
+   * Liefert das Fachmodell mit der übergebenen GUID im OpenOffice-Format zurück Similar to <code>
+   * exportOdt1</code> but it also returns the http response headers . Diese API erlaubt optional
+   * eine Authentifizierung mittels &#39;Bearer {accessToken}&#39; über den Authorization-Header, um
+   * nicht öffentlich sichtbare Informationselemente abrufen zu können.
+   *
+   * @param guid (required)
    * @return A ApiResponse that wraps the response boyd and the http headers.
    */
   @RequestLine("GET /aia/api/v1/public/domainSpecificModel/{guid}/openOffice")
@@ -74,12 +74,13 @@ public interface FachmodelleApi extends ApiClient.Api {
   })
   ApiResponse<byte[]> exportOdt1WithHttpInfo(@Param("guid") UUID guid);
 
-
-
   /**
-   * Liefert eine .zip-Datei mit allen Okstra-Dateien, die mit dem Fachmodell assoziiert sind, zurück.
-   * Diese API erlaubt optional eine Authentifizierung mittels &#39;Bearer {accessToken}&#39; über den Authorization-Header, um nicht öffentlich sichtbare Informationselemente abrufen zu können.
-   * @param guid  (required)
+   * Liefert eine .zip-Datei mit allen Okstra-Dateien, die mit dem Fachmodell assoziiert sind,
+   * zurück. Diese API erlaubt optional eine Authentifizierung mittels &#39;Bearer
+   * {accessToken}&#39; über den Authorization-Header, um nicht öffentlich sichtbare
+   * Informationselemente abrufen zu können.
+   *
+   * @param guid (required)
    * @return byte[]
    */
   @RequestLine("GET /aia/api/v1/public/domainSpecificModel/{guid}/okstra")
@@ -89,10 +90,12 @@ public interface FachmodelleApi extends ApiClient.Api {
   byte[] exportOkstra1(@Param("guid") UUID guid);
 
   /**
-   * Liefert eine .zip-Datei mit allen Okstra-Dateien, die mit dem Fachmodell assoziiert sind, zurück.
-   * Similar to <code>exportOkstra1</code> but it also returns the http response headers .
-   * Diese API erlaubt optional eine Authentifizierung mittels &#39;Bearer {accessToken}&#39; über den Authorization-Header, um nicht öffentlich sichtbare Informationselemente abrufen zu können.
-   * @param guid  (required)
+   * Liefert eine .zip-Datei mit allen Okstra-Dateien, die mit dem Fachmodell assoziiert sind,
+   * zurück. Similar to <code>exportOkstra1</code> but it also returns the http response headers .
+   * Diese API erlaubt optional eine Authentifizierung mittels &#39;Bearer {accessToken}&#39; über
+   * den Authorization-Header, um nicht öffentlich sichtbare Informationselemente abrufen zu können.
+   *
+   * @param guid (required)
    * @return A ApiResponse that wraps the response boyd and the http headers.
    */
   @RequestLine("GET /aia/api/v1/public/domainSpecificModel/{guid}/okstra")
@@ -101,12 +104,12 @@ public interface FachmodelleApi extends ApiClient.Api {
   })
   ApiResponse<byte[]> exportOkstra1WithHttpInfo(@Param("guid") UUID guid);
 
-
-
   /**
-   * Liefert das Fachmodell mit der übergebenen GUID im PDF-Format zurück
-   * Diese API erlaubt optional eine Authentifizierung mittels &#39;Bearer {accessToken}&#39; über den Authorization-Header, um nicht öffentlich sichtbare Informationselemente abrufen zu können.
-   * @param guid  (required)
+   * Liefert das Fachmodell mit der übergebenen GUID im PDF-Format zurück Diese API erlaubt optional
+   * eine Authentifizierung mittels &#39;Bearer {accessToken}&#39; über den Authorization-Header, um
+   * nicht öffentlich sichtbare Informationselemente abrufen zu können.
+   *
+   * @param guid (required)
    * @return byte[]
    */
   @RequestLine("GET /aia/api/v1/public/domainSpecificModel/{guid}/pdf")
@@ -116,10 +119,12 @@ public interface FachmodelleApi extends ApiClient.Api {
   byte[] exportPdf1(@Param("guid") UUID guid);
 
   /**
-   * Liefert das Fachmodell mit der übergebenen GUID im PDF-Format zurück
-   * Similar to <code>exportPdf1</code> but it also returns the http response headers .
-   * Diese API erlaubt optional eine Authentifizierung mittels &#39;Bearer {accessToken}&#39; über den Authorization-Header, um nicht öffentlich sichtbare Informationselemente abrufen zu können.
-   * @param guid  (required)
+   * Liefert das Fachmodell mit der übergebenen GUID im PDF-Format zurück Similar to <code>
+   * exportPdf1</code> but it also returns the http response headers . Diese API erlaubt optional
+   * eine Authentifizierung mittels &#39;Bearer {accessToken}&#39; über den Authorization-Header, um
+   * nicht öffentlich sichtbare Informationselemente abrufen zu können.
+   *
+   * @param guid (required)
    * @return A ApiResponse that wraps the response boyd and the http headers.
    */
   @RequestLine("GET /aia/api/v1/public/domainSpecificModel/{guid}/pdf")
@@ -128,12 +133,13 @@ public interface FachmodelleApi extends ApiClient.Api {
   })
   ApiResponse<byte[]> exportPdf1WithHttpInfo(@Param("guid") UUID guid);
 
-
-
   /**
-   * Liefert eine .zip-Datei mit allen LOIN-XML-Dateien, die mit dem Fachmodell assoziiert sind, zurück.
-   * Diese API erlaubt optional eine Authentifizierung mittels &#39;Bearer {accessToken}&#39; über den Authorization-Header, um nicht öffentlich sichtbare Informationselemente abrufen zu können.
-   * @param guid  (required)
+   * Liefert eine .zip-Datei mit allen LOIN-XML-Dateien, die mit dem Fachmodell assoziiert sind,
+   * zurück. Diese API erlaubt optional eine Authentifizierung mittels &#39;Bearer
+   * {accessToken}&#39; über den Authorization-Header, um nicht öffentlich sichtbare
+   * Informationselemente abrufen zu können.
+   *
+   * @param guid (required)
    * @return byte[]
    */
   @RequestLine("GET /aia/api/v1/public/domainSpecificModel/{guid}/loinXML")
@@ -143,10 +149,12 @@ public interface FachmodelleApi extends ApiClient.Api {
   byte[] exportXml1(@Param("guid") UUID guid);
 
   /**
-   * Liefert eine .zip-Datei mit allen LOIN-XML-Dateien, die mit dem Fachmodell assoziiert sind, zurück.
-   * Similar to <code>exportXml1</code> but it also returns the http response headers .
-   * Diese API erlaubt optional eine Authentifizierung mittels &#39;Bearer {accessToken}&#39; über den Authorization-Header, um nicht öffentlich sichtbare Informationselemente abrufen zu können.
-   * @param guid  (required)
+   * Liefert eine .zip-Datei mit allen LOIN-XML-Dateien, die mit dem Fachmodell assoziiert sind,
+   * zurück. Similar to <code>exportXml1</code> but it also returns the http response headers .
+   * Diese API erlaubt optional eine Authentifizierung mittels &#39;Bearer {accessToken}&#39; über
+   * den Authorization-Header, um nicht öffentlich sichtbare Informationselemente abrufen zu können.
+   *
+   * @param guid (required)
    * @return A ApiResponse that wraps the response boyd and the http headers.
    */
   @RequestLine("GET /aia/api/v1/public/domainSpecificModel/{guid}/loinXML")
@@ -155,12 +163,12 @@ public interface FachmodelleApi extends ApiClient.Api {
   })
   ApiResponse<byte[]> exportXml1WithHttpInfo(@Param("guid") UUID guid);
 
-
-
   /**
-   * Liefert das Fachmodell mit der gesuchten GUID
-   * Diese API erlaubt optional eine Authentifizierung mittels &#39;Bearer {accessToken}&#39; über den Authorization-Header, um nicht öffentlich sichtbare Informationselemente abrufen zu können.
-   * @param guid  (required)
+   * Liefert das Fachmodell mit der gesuchten GUID Diese API erlaubt optional eine Authentifizierung
+   * mittels &#39;Bearer {accessToken}&#39; über den Authorization-Header, um nicht öffentlich
+   * sichtbare Informationselemente abrufen zu können.
+   *
+   * @param guid (required)
    * @return AIADomainSpecificModelPublicDto
    */
   @RequestLine("GET /aia/api/v1/public/domainSpecificModel/{guid}")
@@ -170,24 +178,27 @@ public interface FachmodelleApi extends ApiClient.Api {
   AIADomainSpecificModelPublicDto getDomainSpecificModelForPublic(@Param("guid") UUID guid);
 
   /**
-   * Liefert das Fachmodell mit der gesuchten GUID
-   * Similar to <code>getDomainSpecificModelForPublic</code> but it also returns the http response headers .
-   * Diese API erlaubt optional eine Authentifizierung mittels &#39;Bearer {accessToken}&#39; über den Authorization-Header, um nicht öffentlich sichtbare Informationselemente abrufen zu können.
-   * @param guid  (required)
+   * Liefert das Fachmodell mit der gesuchten GUID Similar to <code>getDomainSpecificModelForPublic
+   * </code> but it also returns the http response headers . Diese API erlaubt optional eine
+   * Authentifizierung mittels &#39;Bearer {accessToken}&#39; über den Authorization-Header, um
+   * nicht öffentlich sichtbare Informationselemente abrufen zu können.
+   *
+   * @param guid (required)
    * @return A ApiResponse that wraps the response boyd and the http headers.
    */
   @RequestLine("GET /aia/api/v1/public/domainSpecificModel/{guid}")
   @Headers({
     "Accept: application/json",
   })
-  ApiResponse<AIADomainSpecificModelPublicDto> getDomainSpecificModelForPublicWithHttpInfo(@Param("guid") UUID guid);
-
-
+  ApiResponse<AIADomainSpecificModelPublicDto> getDomainSpecificModelForPublicWithHttpInfo(
+      @Param("guid") UUID guid);
 
   /**
-   * Liefert alle Fachmodelle, die zu den Suchparametern passen
-   * Diese API erlaubt optional eine Authentifizierung mittels &#39;Bearer {accessToken}&#39; über den Authorization-Header, um nicht öffentlich sichtbare Informationselemente abrufen zu können.
-   * @param aiaDomainSpecificModelForPublicRequest  (required)
+   * Liefert alle Fachmodelle, die zu den Suchparametern passen Diese API erlaubt optional eine
+   * Authentifizierung mittels &#39;Bearer {accessToken}&#39; über den Authorization-Header, um
+   * nicht öffentlich sichtbare Informationselemente abrufen zu können.
+   *
+   * @param aiaDomainSpecificModelForPublicRequest (required)
    * @return List&lt;SimpleDomainSpecificModelPublicDto&gt;
    */
   @RequestLine("POST /aia/api/v1/public/domainSpecificModel")
@@ -195,13 +206,16 @@ public interface FachmodelleApi extends ApiClient.Api {
     "Content-Type: application/json",
     "Accept: application/json",
   })
-  List<SimpleDomainSpecificModelPublicDto> getDomainSpecificModelsForPublic(AiaDomainSpecificModelForPublicRequest aiaDomainSpecificModelForPublicRequest);
+  List<SimpleDomainSpecificModelPublicDto> getDomainSpecificModelsForPublic(
+      AiaDomainSpecificModelForPublicRequest aiaDomainSpecificModelForPublicRequest);
 
   /**
-   * Liefert alle Fachmodelle, die zu den Suchparametern passen
-   * Similar to <code>getDomainSpecificModelsForPublic</code> but it also returns the http response headers .
-   * Diese API erlaubt optional eine Authentifizierung mittels &#39;Bearer {accessToken}&#39; über den Authorization-Header, um nicht öffentlich sichtbare Informationselemente abrufen zu können.
-   * @param aiaDomainSpecificModelForPublicRequest  (required)
+   * Liefert alle Fachmodelle, die zu den Suchparametern passen Similar to <code>
+   * getDomainSpecificModelsForPublic</code> but it also returns the http response headers . Diese
+   * API erlaubt optional eine Authentifizierung mittels &#39;Bearer {accessToken}&#39; über den
+   * Authorization-Header, um nicht öffentlich sichtbare Informationselemente abrufen zu können.
+   *
+   * @param aiaDomainSpecificModelForPublicRequest (required)
    * @return A ApiResponse that wraps the response boyd and the http headers.
    */
   @RequestLine("POST /aia/api/v1/public/domainSpecificModel")
@@ -209,7 +223,7 @@ public interface FachmodelleApi extends ApiClient.Api {
     "Content-Type: application/json",
     "Accept: application/json",
   })
-  ApiResponse<List<SimpleDomainSpecificModelPublicDto>> getDomainSpecificModelsForPublicWithHttpInfo(AiaDomainSpecificModelForPublicRequest aiaDomainSpecificModelForPublicRequest);
-
-
+  ApiResponse<List<SimpleDomainSpecificModelPublicDto>>
+      getDomainSpecificModelsForPublicWithHttpInfo(
+          AiaDomainSpecificModelForPublicRequest aiaDomainSpecificModelForPublicRequest);
 }

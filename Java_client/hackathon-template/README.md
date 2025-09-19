@@ -37,9 +37,9 @@ hackathon-template/
 public class HackathonApplication {
     public static void main(String[] args) {
         EnhancedBimPortalClient client = BimPortalClientBuilder.buildDefault();
-        
+
         // 🚀 Build your innovative solution here!
-        
+
         client.logout();
     }
 }
