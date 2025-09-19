@@ -21,17 +21,17 @@ dependencies {
     // Dependency on the BIM Portal enhanced client
     implementation(project(":bim-portal-enhanced"))
 
-    // Spring Boot starters for web applications (optional for hackathon)
+    // Spring Boot starters
     implementation("org.springframework.boot:spring-boot-starter")
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-json")
 
-    // Additional utilities for hackathon development
+    // Utilities
     implementation("org.apache.commons:commons-lang3:3.12.0")
     implementation("org.apache.commons:commons-csv:1.10.0")
     implementation("com.google.guava:guava:32.1.2-jre")
 
-    // JSON processing
+    // JSON
     implementation("com.fasterxml.jackson.core:jackson-databind:2.15.2")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.2")
 
@@ -50,7 +50,63 @@ application {
     mainClass.set("com.bimportal.hackathon.HackathonApplication")
 }
 
-// Custom tasks for different hackathon scenarios
+// --- Helper to load .env ---
+fun loadEnvFile(): Map<String, String> {
+    val envProps = mutableMapOf<String, String>()
+    val searchPaths = listOf(
+        file(".env"),
+        file("../.env"),
+        file("../../.env"),
+        rootProject.file(".env")
+    )
+
+    val envFile = searchPaths.firstOrNull { it.exists() }
+
+    if (envFile != null) {
+        envFile.readLines().forEach { line ->
+            val cleanLine = line.trim()
+            if (cleanLine.isNotEmpty() && !cleanLine.startsWith("#") && cleanLine.contains("=")) {
+                val parts = cleanLine.split("=", limit = 2)
+                if (parts.size == 2) {
+                    val key = parts[0].trim()
+                    var value = parts[1].trim()
+                    // Strip inline comments if not quoted
+                    if (!value.startsWith("\"") && !value.startsWith("'")) {
+                        value = value.split("#", limit = 2)[0].trim()
+                    }
+                    value = value.removeSurrounding("\"").removeSurrounding("'")
+                    envProps[key] = value
+                }
+            }
+        }
+        println("✅ Loaded ${envProps.size} environment variables from ${envFile.name}")
+        envProps["LOG_LEVEL"]?.let { println("   LOG_LEVEL: $it") }
+    } else {
+        println("❌ No .env file found in search paths")
+    }
+
+    return envProps
+}
+
+val envProperties by lazy { loadEnvFile() }
+
+// --- Configure JavaExec tasks ---
+tasks.withType<JavaExec> {
+    val logLevel = envProperties["LOG_LEVEL"] ?: "INFO"
+
+    // System properties for logging
+    systemProperty("LOG_LEVEL", logLevel)
+    systemProperty("logging.level.root", logLevel)
+    systemProperty("logging.level.com.bimportal.hackathon", logLevel)
+
+    // Propagate all .env vars
+    envProperties.forEach { (key, value) ->
+        environment(key, value)    // available via System.getenv()
+        systemProperty(key, value) // available via System.getProperty()
+    }
+}
+
+// --- Custom tasks ---
 tasks.register<JavaExec>("runBasicExample") {
     group = "hackathon"
     description = "Run basic BIM Portal API example"
@@ -58,19 +114,11 @@ tasks.register<JavaExec>("runBasicExample") {
     mainClass.set("com.bimportal.hackathon.examples.BasicExample")
 }
 
-
-// Resource processing
-//tasks.processResources {
-//    filesMatching("application.properties") {
-//        expand(project.properties)
-//    }
-//}
-
 tasks.test {
     useJUnitPlatform()
 }
 
-// Custom fat JAR task for easy deployment
+// --- Fat JAR for deployment ---
 tasks.register<Jar>("hackathonJar") {
     group = "hackathon"
     description = "Create a fat JAR for hackathon deployment"
