@@ -5,6 +5,13 @@ This module demonstrates batch export workflows for multiple projects and LOINs
 in PDF format for efficient bulk processing.
 Refactored to use simple common utility functions.
 """
+import os
+import sys
+from pathlib import Path
+
+# Ensure we can import from project root
+project_root = Path(__file__).parent.parent.parent
+sys.path.insert(0, str(project_root))
 
 import logging
 from examples.export_examples.utils.common_utils import (

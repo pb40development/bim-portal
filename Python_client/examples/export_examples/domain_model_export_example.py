@@ -6,6 +6,12 @@ PDF, OpenOffice, OKSTRA, LOIN-XML, and IDS with automatic content type detection
 """
 
 import os
+import sys
+from pathlib import Path
+
+# Ensure we can import from project root
+project_root = Path(__file__).parent.parent.parent
+sys.path.insert(0, str(project_root))
 import logging
 from pathlib import Path
 from typing import Dict, Optional

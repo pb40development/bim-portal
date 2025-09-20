@@ -110,6 +110,18 @@ xml = client.export_loin_xml(guid)
 python examples/health_check.py
 ```
 
+## Run Examples
+
+**Method 1: IDE (Recommended for Development)**
+- Open `\examples\export_examples\loin_export_example.py` in your IDE
+- Click the "Run" (or Debug) button
+
+**Method 2: Command Line (from Python_client directory)**
+```bash
+ python .\examples\export_examples\loin_export_example.py
+```
+
+
 ## 📂 File Structure
 - `hackathon_example/` - **Start here!** Your main workspace
 - `examples/` - Advanced examples and utilities
