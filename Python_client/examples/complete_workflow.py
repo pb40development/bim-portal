@@ -11,7 +11,7 @@ from uuid import UUID
 
 from client.auth.auth_service_impl import AuthService
 from client.enhanced_bim_client import EnhancedBimPortalClient
-from examples.utils.export_utils import ExportUtils
+from examples.export_examples.utils.export_utils import ExportUtils
 from client.models import (
     AiaProjectForPublicRequest,
     PropertyOrGroupForPublicRequest

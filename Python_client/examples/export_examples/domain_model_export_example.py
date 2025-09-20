@@ -1,7 +1,7 @@
 """
 Domain-specific model export examples for BIM Portal Python client.
 
-This module demonstrates domain-specific model export workflows in multiple formats including 
+This module demonstrates domain-specific model export workflows in multiple formats including
 PDF, OpenOffice, OKSTRA, LOIN-XML, and IDS with automatic content type detection.
 """
 
@@ -16,7 +16,8 @@ from client.auth.auth_config import BIM_PORTAL_PASSWORD_ENV_VAR, BIM_PORTAL_USER
 from client.auth.auth_service_impl import AuthService
 from client.enhanced_bim_client import EnhancedBimPortalClient
 from client.config import BIMPortalConfig
-from examples.utils.export_utils import ExportUtils
+from examples.export_examples.utils.common_utils import check_credentials
+from examples.export_examples.utils.export_utils import ExportUtils
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -26,51 +27,36 @@ logger = logging.getLogger(__name__)
 load_dotenv()
 
 
-def check_credentials() -> bool:
-    """
-    Check if credentials are available for authentication.
-    
-    Returns:
-        True if credentials are configured
-    """
-    if not os.getenv(BIM_PORTAL_USERNAME_ENV_VAR) or not os.getenv(BIM_PORTAL_PASSWORD_ENV_VAR):
-        print("=" * 60)
-        print("WARNING: Credentials not found in environment variables.")
-        print(f"Please set {BIM_PORTAL_USERNAME_ENV_VAR} and {BIM_PORTAL_PASSWORD_ENV_VAR} in .env file.")
-        print("=" * 60)
-        return False
-    return True
-
 
 def run_domain_model_export_examples(client: EnhancedBimPortalClient):
     """
     Run domain-specific model export examples with comprehensive format support.
-    
+
     Args:
         client: Enhanced BIM Portal client
     """
     print("\n" + "=" * 60)
     print("🗂️  DOMAIN MODEL EXPORT EXAMPLES")
     print("=" * 60)
-    
+
     print("\n1️⃣ Searching for available domain models...")
     try:
         domain_models = client.search_domain_models()
         if not domain_models:
             print("🔭 No domain models found for export")
             return
-        
+
         print(f"✅ Found {len(domain_models)} domain models:")
         for i, model in enumerate(domain_models[:3], 1):
             print(f"   {i}. {model.name} ({model.guid})")
-        
+
         selected_model = domain_models[0]
         print(f"\n🎯 Using domain model: '{selected_model.name}'")
-        
+
         export_results: Dict[str, Optional[Path]] = {}
-        
+
         print("\n2️⃣ Exporting domain model in multiple formats...")
-        
+
         # PDF Export with auto-detection
         print("   📄 Exporting as PDF...")
         pdf_content = client.export_domain_model_pdf(selected_model.guid)
@@ -86,7 +72,7 @@ def run_domain_model_export_examples(client: EnhancedBimPortalClient):
         else:
             print("   ❌ PDF export failed: No content received")
             export_results['PDF'] = None
-        
+
         # OpenOffice Export with auto-detection
         print("   📝 Exporting as OpenOffice...")
         odt_content = client.export_domain_model_openoffice(selected_model.guid)
@@ -102,7 +88,7 @@ def run_domain_model_export_examples(client: EnhancedBimPortalClient):
         else:
             print("   ❌ OpenOffice export failed: No content received")
             export_results['OpenOffice'] = None
-        
+
         # OKSTRA Export with auto-detection
         print("   🗂️ Exporting as OKSTRA...")
         okstra_content = client.export_domain_model_okstra(selected_model.guid)
@@ -118,7 +104,7 @@ def run_domain_model_export_examples(client: EnhancedBimPortalClient):
         else:
             print("   ❌ OKSTRA export failed: No content received")
             export_results['OKSTRA'] = None
-        
+
         # LOIN-XML Export with auto-detection
         print("   🔗 Exporting as LOIN-XML...")
         loin_xml_content = client.export_domain_model_loin_xml(selected_model.guid)
@@ -134,7 +120,7 @@ def run_domain_model_export_examples(client: EnhancedBimPortalClient):
         else:
             print("   ❌ LOIN-XML export failed: No content received")
             export_results['LOIN-XML'] = None
-        
+
         # IDS Export with auto-detection
         print("   🆔 Exporting as IDS...")
         ids_content = client.export_domain_model_ids(selected_model.guid)
@@ -150,24 +136,24 @@ def run_domain_model_export_examples(client: EnhancedBimPortalClient):
         else:
             print("   ❌ IDS export failed: No content received")
             export_results['IDS'] = None
-        
+
         # Summary with file type information
         successful_exports = len([path for path in export_results.values() if path is not None])
         total_formats = len(export_results)
-        
+
         print(f"\n📈 Export Summary: {successful_exports}/{total_formats} formats successful")
-        
+
         for format_name, path in export_results.items():
             if path:
                 extension = path.suffix[1:].upper() if path.suffix else "UNKNOWN"
                 print(f"   ✅ {format_name} ({extension}): {path}")
             else:
                 print(f"   ❌ {format_name}: Export failed")
-        
+
         if successful_exports < 3:
             print("💡 Note: Some export formats may require special permissions or project setup")
             print("💡 Content type detection helps ensure correct file extensions are used")
-        
+
         # Additional domain model details
         print(f"\n📋 Domain Model Details:")
         try:
@@ -185,7 +171,7 @@ def run_domain_model_export_examples(client: EnhancedBimPortalClient):
                 print("   Could not retrieve detailed information")
         except Exception as e:
             print(f"   Error retrieving details: {e}")
-        
+
     except Exception as e:
         logger.error(f"Error in domain model export examples: {e}")
         print(f"❌ Error in domain model export examples: {e}")
@@ -196,27 +182,27 @@ def main():
     print("=" * 70)
     print("🚀 BIM PORTAL DOMAIN MODEL EXPORT EXAMPLES")
     print("=" * 70)
-    
+
     if not check_credentials():
         print("❌ Cannot run export examples without credentials")
         return
-    
+
     if not ExportUtils.is_export_directory_writable():
         print("❌ Export directory is not writable!")
         return
-    
+
     print("🔧 Setting up authenticated client...")
-    
+
     try:
         auth_service = AuthService()
         client = EnhancedBimPortalClient(
-            auth_service=auth_service, 
+            auth_service=auth_service,
             base_url=BIMPortalConfig.BASE_URL
         )
-        
+
         # Run domain model export examples
         run_domain_model_export_examples(client)
-        
+
         print("\n" + "=" * 70)
         print("✅ DOMAIN MODEL EXPORT EXAMPLES COMPLETE!")
         print("=" * 70)

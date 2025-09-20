@@ -16,7 +16,8 @@ from client.auth.auth_config import BIM_PORTAL_PASSWORD_ENV_VAR, BIM_PORTAL_USER
 from client.auth.auth_service_impl import AuthService
 from client.enhanced_bim_client import EnhancedBimPortalClient
 from client.config import BIMPortalConfig
-from examples.utils.export_utils import ExportUtils
+from examples.export_examples.utils.common_utils import check_credentials
+from examples.export_examples.utils.export_utils import ExportUtils
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -24,22 +25,6 @@ logger = logging.getLogger(__name__)
 
 # Load environment variables
 load_dotenv()
-
-
-def check_credentials() -> bool:
-    """
-    Check if credentials are available for authentication.
-    
-    Returns:
-        True if credentials are configured
-    """
-    if not os.getenv(BIM_PORTAL_USERNAME_ENV_VAR) or not os.getenv(BIM_PORTAL_PASSWORD_ENV_VAR):
-        print("=" * 60)
-        print("WARNING: Credentials not found in environment variables.")
-        print(f"Please set {BIM_PORTAL_USERNAME_ENV_VAR} and {BIM_PORTAL_PASSWORD_ENV_VAR} in .env file.")
-        print("=" * 60)
-        return False
-    return True
 
 
 def run_loin_export_examples(client: EnhancedBimPortalClient):

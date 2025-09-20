@@ -1,6 +1,6 @@
-# BIM Portal API - Hackathon Interface
+# BIM Portal Python Client - Hackathon Edition
 
-A simplified Python interface to access the German BIM Portal API for hackathons and rapid prototyping.
+Quick access to the German BIM Portal API for hackathons and rapid prototyping.
 
 ## Setup
 
@@ -47,90 +47,92 @@ conda env create -f environment.yml
 conda activate bim-portal-hackathon
 ```
 
-## Quick Start
+## 🚀 Quick Start
+### 0. Create and account in the BIM Portal website (EDU environment)
+Visit: https://via.bund.de/bmdv/bim-portal/edu/bim and click on register.
 
-### 1. Setup Credentials
+### 1. Configure Credentials
 ```bash
-cp .env_example .env
-# Edit .env with your credentials
-BIM_PORTAL_USERNAME="your-email@example.com"
-BIM_PORTAL_PASSWORD="your-secret-password"
+cp env.example .env
+# Edit .env with your BIM Portal credentials used for registration:
+# BIM_PORTAL_USERNAME="your-email@example.com"
+# BIM_PORTAL_PASSWORD="your-password"
 ```
 
-### 2. Basic Usage
+### 2. Run Example
+
+**Method 1: IDE (Recommended for Development)**
+- Open `hackathon_example/hackathon_example.py` in your IDE
+- Click the "Run" (or debug) button
+
+**Method 2: Command Line (Recommended for Consistency)**
+```bash
+python -m hackathon_example.hackathon_example
+```
+
+## 💡 Hackathon Code Template
+
+Edit `hackathon_example/hackathon_example.py` and add your code to the `run_hackathon_code()` function:
 
 ```python
-from hackathon_example.hackathon_interface import BIMPortal
-
-# Initialize
-bim = BIMPortal()
-
-# Search for projects
-projects = bim.get_projects(search="Beispiel")
-print(f"Found {len(projects)} projects")
-
-# Get project details
-if projects:
-    project = bim.get_project_details(projects[0].guid)
-    print(f"Project: {project.name}")
-
-    # Export as PDF
-    pdf_path = bim.export_project_pdf(projects[0].guid)
-    print(f"Exported to: {pdf_path}")
+def run_hackathon_code(client):
+    # Your hackathon code here!
+    projects = client.search_projects()
+    loins = client.search_loins()
+    properties = client.search_properties()
+    
+    # Export examples
+    if projects:
+        pdf_content = client.export_project_pdf(projects[0].guid)
+        # Save using ExportUtils.save_export_file()
 ```
 
-### 3. Health Check
-```bash
-python -m demo.health_check
-```
+## 📚 Key Methods
 
-## Advanced Usage
-
-### Using the Raw Enhanced Client
-If you need more control, access the underlying client:
 ```python
-bim = BIMPortal()
-raw_client = bim.client
+# Search
+projects = client.search_projects()
+loins = client.search_loins() 
+properties = client.search_properties()
 
-# Use any method from enhanced_bim_client.py
-projects = raw_client.search_projects()
-properties = raw_client.search_properties()
+# Get Details
+project = client.get_project(guid)
+loin = client.get_loin(guid)
+
+# Export (returns bytes)
+pdf = client.export_project_pdf(guid)
+ids = client.export_loin_ids(guid)
+xml = client.export_loin_xml(guid)
 ```
 
-## File Structure
-```
-BIM_Portal_API_Interfaces/
-├── hackathon_interface.py    # Main interface (start here!)
-├── models.py                 # Data models (for Data Validation, Type Safety and Serialization -  conversion between Python objects and JSON for API requests/responses)
-├── enhanced_bim_client.py    # Advanced client with all the available endpoints
-├── demo/
-│   ├── credentials_setup.py  # Setup credentials
-│   ├── health_check.py       # Test connection
-│   └── authenticated_cli.py  # Command-line tool
-├── examples/                 # More examples
-└── exports/                  # Downloaded files go here
+## 🔧 Health Check
+```bash
+python examples/health_check.py
 ```
 
-## Troubleshooting
+## 📂 File Structure
+- `hackathon_example/` - **Start here!** Your main workspace
+- `examples/` - Advanced examples and utilities
+- `client/` - Core API client (don't modify)
+- `exports/` - Downloaded files saved here
 
-### Credentials Issues
-- Run `python demo/credentials_setup.py` to reset credentials
-- Check that `.env` file exists in project root
-- Verify credentials work at: https://via.bund.de/bim
+## 🎯 Tips for Hackathon Success
 
-### API Issues
-- Run `python -m demo.health_check` for diagnostics
-- Check internet connection
-- Some resources may require special permissions
+1. **Start with the template**: Run `from hackathon_example import main` first
+2. **Use the examples**: Copy patterns from `examples/export_examples/`
+3. **Save files properly**: Use `ExportUtils.save_export_file()` for exports
+4. **Test connection**: Run health check if you have issues
 
-### Common Errors
-- `FileNotFoundError`: Run credentials setup first
-- `AuthenticationError`: Check username/password
-- `Empty results`: Try broader search terms
+## 🆘 Troubleshooting
 
+| Problem | Solution |
+|---------|----------|
+| Import errors | Run `pip install -e .` |
+| Auth failed | Check `.env` file exists and has correct credentials |
+| No data found | Try broader search terms or check permissions |
+| Connection issues | Run `python examples/health_check.py` |
 
-## Support
+**Need BIM Portal access?** Visit: https://via.bund.de/bmdv/bim-portal/edu/bim
 
-- Check `examples/` folder for more detailed examples
-- Run `python hackathon_interface.py` for a quick demo
-- Use `bim.health_check()` to test your setup
+---
+**Ready to hack!** 🚀 Edit `hackathon_example/hackathon_example.py` and start building!

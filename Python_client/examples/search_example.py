@@ -15,6 +15,7 @@ from client.auth.auth_service_impl import AuthService
 from client.enhanced_bim_client import EnhancedBimPortalClient
 from client.config import BIMPortalConfig
 from client.models import AiaProjectForPublicRequest, PropertyOrGroupForPublicRequest
+from examples.export_examples.utils.common_utils import check_credentials
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -22,22 +23,6 @@ logger = logging.getLogger(__name__)
 
 # Load environment variables
 load_dotenv()
-
-
-def check_credentials() -> bool:
-    """
-    Check if credentials are available for authentication.
-    
-    Returns:
-        True if credentials are configured
-    """
-    if not os.getenv(BIM_PORTAL_USERNAME_ENV_VAR) or not os.getenv(BIM_PORTAL_PASSWORD_ENV_VAR):
-        print("=" * 60)
-        print("WARNING: Credentials not found in environment variables.")
-        print(f"Please set {BIM_PORTAL_USERNAME_ENV_VAR} and {BIM_PORTAL_PASSWORD_ENV_VAR} in .env file.")
-        print("=" * 60)
-        return False
-    return True
 
 
 def run_search_examples(client: EnhancedBimPortalClient):

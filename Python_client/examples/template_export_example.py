@@ -16,7 +16,7 @@ from client.auth.auth_config import BIM_PORTAL_PASSWORD_ENV_VAR, BIM_PORTAL_USER
 from client.auth.auth_service_impl import AuthService
 from client.enhanced_bim_client import EnhancedBimPortalClient
 from client.config import BIMPortalConfig
-from examples.utils.export_utils import ExportUtils
+from examples.export_examples.utils.export_utils import ExportUtils
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)

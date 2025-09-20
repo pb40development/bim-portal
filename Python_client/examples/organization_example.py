@@ -228,12 +228,9 @@ def analyze_jwt_token_structure(token: str):
                 
                 # Look for common user ID claims
                 print("   🔍 Checking for user ID claims:")
-                check_for_claim(payload_json, "sub")
-                # check_for_claim(payload_json, "userId")
-                # check_for_claim(payload_json, "user_id")
-                # check_for_claim(payload_json, "id")
-                check_for_claim(payload_json, "email")
-                # check_for_claim(payload_json, "username")
+                check_for_claim(payload_json, "sub") # This is the user id
+                check_for_claim(payload_json, "email") # This is the username
+
                 
             except Exception as decode_error:
                 print(f"   ❌ Failed to decode payload: {decode_error}")
