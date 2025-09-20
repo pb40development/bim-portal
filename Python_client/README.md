@@ -3,14 +3,11 @@
 Quick access to the German BIM Portal API for hackathons and rapid prototyping.
 
 ## 🚀 Quick Installation
-
-**Recommended approach:**
 ```bash
 # Clone and install in development mode
 git clone https://github.com/pb40development/bim-portal
 cd bim-portal/Python_client
 ```
-
 This project requires Python 3.12 or higher. All exports will be saved to the exports/ directory.
 
 <details>
