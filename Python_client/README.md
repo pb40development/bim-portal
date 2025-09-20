@@ -150,10 +150,15 @@ python examples/health_check.py
 
 
 ## 📂 File Structure
-- `hackathon_example/` - **Start here!** Your main workspace
-- `examples/` - Advanced examples and utilities
-- `client/` - Core API client (don't modify)
-- `exports/` - Downloaded files saved here
+```
+bim-portal-client/
+├── hackathon_example/     # 🎯 Start here! Your main workspace
+├── examples/              # 📚 Advanced examples and utilities
+├── client/                # 🔧 Core API client (don't modify, but explore aia_mixin.py, properties_mixin.py, auth_mixin.py for available HTTPS requests)
+├── exports/               # 📁 Downloaded files saved here automatically
+├── .env                   # 🔐 Your credentials (create from env.example)
+└── README.md              # 📖 This file
+```
 
 ## 🎯 Tips for Hackathon Success
 
