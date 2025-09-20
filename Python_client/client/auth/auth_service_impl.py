@@ -12,7 +12,7 @@ from .auth_config import (
 )
 from .token_manager import TokenManager
 # Import from your new Pydantic models instead of generated client
-from models import (
+from client.models import (
     UserLoginPublicDto,
     RefreshTokenRequestDTO,
     JWTTokenPublicDto,

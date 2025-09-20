@@ -3,8 +3,8 @@ Authentication and organization management mixin.
 """
 
 from typing import List, Optional
-from auth.auth_config import logger
-from models import (
+from .auth.auth_config import logger
+from .models import (
     OrganisationForPublicDTO, UserLoginPublicDto, 
     JWTTokenPublicDto, RefreshTokenRequestDTO
 )

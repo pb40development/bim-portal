@@ -7,15 +7,14 @@ filters, and organizations according to the BIM Portal API.
 
 import os
 import logging
-from typing import List, Optional
 
 from dotenv import load_dotenv
 
-from auth.auth_config import BIM_PORTAL_PASSWORD_ENV_VAR, BIM_PORTAL_USERNAME_ENV_VAR
-from auth.auth_service_impl import AuthService
-from enhanced_bim_client import EnhancedBimPortalClient
-from config import BIMPortalConfig
-from models import AiaProjectForPublicRequest, PropertyOrGroupForPublicRequest
+from client.auth.auth_config import BIM_PORTAL_PASSWORD_ENV_VAR, BIM_PORTAL_USERNAME_ENV_VAR
+from client.auth.auth_service_impl import AuthService
+from client.enhanced_bim_client import EnhancedBimPortalClient
+from client.config import BIMPortalConfig
+from client.models import AiaProjectForPublicRequest, PropertyOrGroupForPublicRequest
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)

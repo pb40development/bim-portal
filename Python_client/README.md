@@ -58,8 +58,9 @@ BIM_PORTAL_PASSWORD="your-secret-password"
 ```
 
 ### 2. Basic Usage
+
 ```python
-from hackathon_interface import BIMPortal
+from hackathon_example.hackathon_interface import BIMPortal
 
 # Initialize
 bim = BIMPortal()
@@ -72,7 +73,7 @@ print(f"Found {len(projects)} projects")
 if projects:
     project = bim.get_project_details(projects[0].guid)
     print(f"Project: {project.name}")
-    
+
     # Export as PDF
     pdf_path = bim.export_project_pdf(projects[0].guid)
     print(f"Exported to: {pdf_path}")

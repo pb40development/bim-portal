@@ -10,7 +10,7 @@ from datetime import timedelta
 import os
 
 # Import centralized configuration
-from config import BIMPortalConfig
+from client.config import BIMPortalConfig
 
 # --- Logging Configuration ---
 log_level = os.getenv("LOG_LEVEL", "INFO").upper()

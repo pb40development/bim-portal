@@ -6,17 +6,15 @@ and uses advanced export capabilities with content type detection.
 
 import os
 import logging
-from pathlib import Path
 from dotenv import load_dotenv
 from uuid import UUID
 
-from auth.auth_service_impl import AuthService
-from enhanced_bim_client import EnhancedBimPortalClient
-from export_utils import ExportUtils
-from models import (
+from client.auth.auth_service_impl import AuthService
+from client.enhanced_bim_client import EnhancedBimPortalClient
+from examples.utils.export_utils import ExportUtils
+from client.models import (
     AiaProjectForPublicRequest,
-    PropertyOrGroupForPublicRequest,
-    LoinForPublicRequest
+    PropertyOrGroupForPublicRequest
 )
 
 # Configure logging
@@ -25,7 +23,7 @@ logger = logging.getLogger(__name__)
 
 # --- Configuration ---
 load_dotenv()
-from config import BIMPortalConfig
+from client.config import BIMPortalConfig
 BASE_URL = BIMPortalConfig.BASE_URL
 AUTH_GUID = BIMPortalConfig.DEFAULT_AUTH_GUID
 

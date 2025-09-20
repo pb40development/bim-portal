@@ -1,15 +1,14 @@
 import os
-from http import HTTPStatus
 from uuid import UUID
 from dotenv import load_dotenv
 
-from auth.auth_service_impl import AuthService, AuthenticationError
-from enhanced_bim_client import EnhancedBimPortalClient
-from auth.auth_config import BIM_PORTAL_USERNAME_ENV_VAR
+from client.auth.auth_service_impl import AuthService, AuthenticationError
+from client.enhanced_bim_client import EnhancedBimPortalClient
+from client.auth.auth_config import BIM_PORTAL_USERNAME_ENV_VAR
 
 # --- Configuration ---
 load_dotenv()
-from config import BIMPortalConfig
+from client.config import BIMPortalConfig
 BASE_URL = BIMPortalConfig.BASE_URL
 # A known private resource to test authentication against
 PRIVATE_RESOURCE_GUID = BIMPortalConfig.PRIVATE_RESOURCE_GUID

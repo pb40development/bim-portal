@@ -4,16 +4,15 @@ Uses the enhanced Pydantic client with error handling.
 """
 
 import os
-from uuid import UUID
 from dotenv import load_dotenv
 
-from auth.auth_service_impl import AuthService
-from enhanced_bim_client import EnhancedBimPortalClient
-from models import PropertyOrGroupForPublicRequest
+from client.auth.auth_service_impl import AuthService
+from client.enhanced_bim_client import EnhancedBimPortalClient
+from client.models import PropertyOrGroupForPublicRequest
 
 # --- Configuration ---
 load_dotenv()
-from config import BIMPortalConfig
+from client.config import BIMPortalConfig
 BASE_URL = BIMPortalConfig.BASE_URL
 AUTH_GUID = BIMPortalConfig.DEFAULT_AUTH_GUID
 

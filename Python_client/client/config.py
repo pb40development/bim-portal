@@ -50,7 +50,7 @@ class BIMPortalConfig:
     
     # --- Application Configuration ---
     LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO").upper()
-    EXPORT_DIRECTORY: str = os.getenv("EXPORT_DIRECTORY", "exports")
+    EXPORT_DIRECTORY: str = os.getenv("EXPORT_DIRECTORY", "../exports")
     MAX_RETRIES: int = int(os.getenv("MAX_RETRIES", "3"))
     
     @classmethod

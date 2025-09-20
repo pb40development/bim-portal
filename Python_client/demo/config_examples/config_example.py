@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 from dotenv import load_dotenv
-from config import BIMPortalConfig
+from client.config import BIMPortalConfig
 
 # --- Application Configuration ---
 # This file demonstrates a best practice for managing configuration in a Python application.

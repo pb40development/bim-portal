@@ -9,9 +9,9 @@ from http import HTTPStatus
 import httpx
 from pydantic import ValidationError
 
-from auth.auth_service_impl import AuthService, AuthenticationError
-from auth.auth_config import AUTH_RETRY_LIMIT, logger
-from config import BIMPortalConfig
+from .auth.auth_service_impl import AuthService, AuthenticationError
+from .auth.auth_config import AUTH_RETRY_LIMIT, logger
+from .config import BIMPortalConfig
 
 
 class BaseClient:

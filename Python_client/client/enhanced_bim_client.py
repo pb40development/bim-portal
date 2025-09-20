@@ -2,12 +2,12 @@
 Enhanced BIM Portal HTTP Client using mixins for better organization.
 """
 
-from auth.auth_service_impl import AuthService
-from config import BIMPortalConfig
-from base_client import BaseClient
-from auth_mixin import AuthMixin
-from properties_mixin import PropertiesMixin
-from aia_mixin import AiaMixin
+from .auth.auth_service_impl import AuthService
+from .config import BIMPortalConfig
+from .base_client import BaseClient
+from .auth_mixin import AuthMixin
+from .properties_mixin import PropertiesMixin
+from .aia_mixin import AiaMixin
 
 
 class EnhancedBimPortalClient(BaseClient, AuthMixin, PropertiesMixin, AiaMixin):

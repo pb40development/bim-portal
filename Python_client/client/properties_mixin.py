@@ -4,8 +4,8 @@ Properties and Property Groups management mixin.
 
 from typing import List, Optional
 from uuid import UUID
-from auth.auth_config import logger
-from models import (
+from .auth.auth_config import logger
+from .models import (
     PropertyOrGroupForPublicDto, PropertyOrGroupForPublicRequest,
     PropertyDto, PropertyGroupDto, FilterGroupForPublicDto
 )

@@ -9,15 +9,14 @@ import os
 import logging
 from pathlib import Path
 from typing import Dict, Optional
-from uuid import UUID
 
 from dotenv import load_dotenv
 
-from auth.auth_config import BIM_PORTAL_PASSWORD_ENV_VAR, BIM_PORTAL_USERNAME_ENV_VAR
-from auth.auth_service_impl import AuthService
-from enhanced_bim_client import EnhancedBimPortalClient
-from config import BIMPortalConfig
-from export_utils import ExportUtils
+from client.auth.auth_config import BIM_PORTAL_PASSWORD_ENV_VAR, BIM_PORTAL_USERNAME_ENV_VAR
+from client.auth.auth_service_impl import AuthService
+from client.enhanced_bim_client import EnhancedBimPortalClient
+from client.config import BIMPortalConfig
+from examples.utils.export_utils import ExportUtils
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)

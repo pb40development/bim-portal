@@ -6,11 +6,11 @@ Includes content type detection and file management capabilities.
 import os
 import zipfile
 from pathlib import Path
-from typing import Optional, Tuple
+from typing import Optional
 from uuid import UUID
 import logging
 
-from config import BIMPortalConfig
+from client.config import BIMPortalConfig
 
 logger = logging.getLogger(__name__)
 

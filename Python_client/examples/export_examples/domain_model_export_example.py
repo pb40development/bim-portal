@@ -1,7 +1,7 @@
 """
-LOIN export examples for BIM Portal Python client.
+Domain-specific model export examples for BIM Portal Python client.
 
-This module demonstrates LOIN export workflows in multiple formats including 
+This module demonstrates domain-specific model export workflows in multiple formats including 
 PDF, OpenOffice, OKSTRA, LOIN-XML, and IDS with automatic content type detection.
 """
 
@@ -9,15 +9,14 @@ import os
 import logging
 from pathlib import Path
 from typing import Dict, Optional
-from uuid import UUID
 
 from dotenv import load_dotenv
 
-from auth.auth_config import BIM_PORTAL_PASSWORD_ENV_VAR, BIM_PORTAL_USERNAME_ENV_VAR
-from auth.auth_service_impl import AuthService
-from enhanced_bim_client import EnhancedBimPortalClient
-from config import BIMPortalConfig
-from export_utils import ExportUtils
+from client.auth.auth_config import BIM_PORTAL_PASSWORD_ENV_VAR, BIM_PORTAL_USERNAME_ENV_VAR
+from client.auth.auth_service_impl import AuthService
+from client.enhanced_bim_client import EnhancedBimPortalClient
+from client.config import BIMPortalConfig
+from examples.utils.export_utils import ExportUtils
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -43,40 +42,40 @@ def check_credentials() -> bool:
     return True
 
 
-def run_loin_export_examples(client: EnhancedBimPortalClient):
+def run_domain_model_export_examples(client: EnhancedBimPortalClient):
     """
-    Run LOIN export examples with comprehensive format support.
+    Run domain-specific model export examples with comprehensive format support.
     
     Args:
         client: Enhanced BIM Portal client
     """
     print("\n" + "=" * 60)
-    print("📋 LOIN EXPORT EXAMPLES")
+    print("🗂️  DOMAIN MODEL EXPORT EXAMPLES")
     print("=" * 60)
     
-    print("\n1️⃣ Searching for available LOINs...")
+    print("\n1️⃣ Searching for available domain models...")
     try:
-        loins = client.search_loins()
-        if not loins:
-            print("🔭 No LOINs found for export")
+        domain_models = client.search_domain_models()
+        if not domain_models:
+            print("🔭 No domain models found for export")
             return
         
-        print(f"✅ Found {len(loins)} LOINs:")
-        for i, loin in enumerate(loins[:3], 1):
-            print(f"   {i}. {loin.name} ({loin.guid})")
+        print(f"✅ Found {len(domain_models)} domain models:")
+        for i, model in enumerate(domain_models[:3], 1):
+            print(f"   {i}. {model.name} ({model.guid})")
         
-        selected_loin = loins[0]
-        print(f"\n🎯 Using LOIN: '{selected_loin.name}'")
+        selected_model = domain_models[0]
+        print(f"\n🎯 Using domain model: '{selected_model.name}'")
         
         export_results: Dict[str, Optional[Path]] = {}
         
-        print("\n2️⃣ Exporting LOIN in multiple formats...")
+        print("\n2️⃣ Exporting domain model in multiple formats...")
         
         # PDF Export with auto-detection
         print("   📄 Exporting as PDF...")
-        pdf_content = client.export_loin_pdf(selected_loin.guid)
+        pdf_content = client.export_domain_model_pdf(selected_model.guid)
         if pdf_content:
-            base_filename = f"loin_pdf_{selected_loin.guid}"
+            base_filename = f"domain_model_pdf_{selected_model.guid}"
             pdf_path = ExportUtils.export_with_detection(pdf_content, base_filename, "pdf")
             if pdf_path:
                 export_results['PDF'] = pdf_path
@@ -90,9 +89,9 @@ def run_loin_export_examples(client: EnhancedBimPortalClient):
         
         # OpenOffice Export with auto-detection
         print("   📝 Exporting as OpenOffice...")
-        odt_content = client.export_loin_openoffice(selected_loin.guid)
+        odt_content = client.export_domain_model_openoffice(selected_model.guid)
         if odt_content:
-            base_filename = f"loin_odt_{selected_loin.guid}"
+            base_filename = f"domain_model_odt_{selected_model.guid}"
             odt_path = ExportUtils.export_with_detection(odt_content, base_filename, "odt")
             if odt_path:
                 export_results['OpenOffice'] = odt_path
@@ -106,9 +105,9 @@ def run_loin_export_examples(client: EnhancedBimPortalClient):
         
         # OKSTRA Export with auto-detection
         print("   🗂️ Exporting as OKSTRA...")
-        okstra_content = client.export_loin_okstra(selected_loin.guid)
+        okstra_content = client.export_domain_model_okstra(selected_model.guid)
         if okstra_content:
-            base_filename = f"loin_okstra_{selected_loin.guid}"
+            base_filename = f"domain_model_okstra_{selected_model.guid}"
             okstra_path = ExportUtils.export_with_detection(okstra_content, base_filename, "zip")
             if okstra_path:
                 export_results['OKSTRA'] = okstra_path
@@ -122,10 +121,10 @@ def run_loin_export_examples(client: EnhancedBimPortalClient):
         
         # LOIN-XML Export with auto-detection
         print("   🔗 Exporting as LOIN-XML...")
-        xml_content = client.export_loin_xml(selected_loin.guid)
-        if xml_content:
-            base_filename = f"loin_xml_{selected_loin.guid}"
-            xml_path = ExportUtils.export_with_detection(xml_content, base_filename, "xml")
+        loin_xml_content = client.export_domain_model_loin_xml(selected_model.guid)
+        if loin_xml_content:
+            base_filename = f"domain_model_loin_{selected_model.guid}"
+            xml_path = ExportUtils.export_with_detection(loin_xml_content, base_filename, "zip")
             if xml_path:
                 export_results['LOIN-XML'] = xml_path
                 print(f"   ✅ LOIN-XML exported: {xml_path}")
@@ -138,10 +137,10 @@ def run_loin_export_examples(client: EnhancedBimPortalClient):
         
         # IDS Export with auto-detection
         print("   🆔 Exporting as IDS...")
-        ids_content = client.export_loin_ids(selected_loin.guid)
+        ids_content = client.export_domain_model_ids(selected_model.guid)
         if ids_content:
-            base_filename = f"loin_ids_{selected_loin.guid}"
-            ids_path = ExportUtils.export_with_detection(ids_content, base_filename, "ids")
+            base_filename = f"domain_model_ids_{selected_model.guid}"
+            ids_path = ExportUtils.export_with_detection(ids_content, base_filename, "xml")
             if ids_path:
                 export_results['IDS'] = ids_path
                 print(f"   ✅ IDS exported: {ids_path}")
@@ -169,31 +168,33 @@ def run_loin_export_examples(client: EnhancedBimPortalClient):
             print("💡 Note: Some export formats may require special permissions or project setup")
             print("💡 Content type detection helps ensure correct file extensions are used")
         
-        # Additional LOIN details
-        print(f"\n📋 LOIN Details:")
+        # Additional domain model details
+        print(f"\n📋 Domain Model Details:")
         try:
-            detailed_loin = client.get_loin(selected_loin.guid)
-            if detailed_loin:
-                print(f"   Name: {detailed_loin.name}")
-                print(f"   GUID: {detailed_loin.guid}")
-                if hasattr(detailed_loin, 'description') and detailed_loin.description:
-                    print(f"   Description: {detailed_loin.description}")
-                if hasattr(detailed_loin, 'version') and detailed_loin.version:
-                    print(f"   Version: {detailed_loin.version}")
+            detailed_model = client.get_domain_model(selected_model.guid)
+            if detailed_model:
+                print(f"   Name: {detailed_model.name}")
+                print(f"   GUID: {detailed_model.guid}")
+                if hasattr(detailed_model, 'description') and detailed_model.description:
+                    print(f"   Description: {detailed_model.description}")
+                if hasattr(detailed_model, 'version') and detailed_model.version:
+                    print(f"   Version: {detailed_model.version}")
+                if hasattr(detailed_model, 'discipline') and detailed_model.discipline:
+                    print(f"   Discipline: {detailed_model.discipline}")
             else:
                 print("   Could not retrieve detailed information")
         except Exception as e:
             print(f"   Error retrieving details: {e}")
         
     except Exception as e:
-        logger.error(f"Error in LOIN export examples: {e}")
-        print(f"❌ Error in LOIN export examples: {e}")
+        logger.error(f"Error in domain model export examples: {e}")
+        print(f"❌ Error in domain model export examples: {e}")
 
 
 def main():
-    """Main method to run LOIN export examples."""
+    """Main method to run domain model export examples."""
     print("=" * 70)
-    print("🚀 BIM PORTAL LOIN EXPORT EXAMPLES")
+    print("🚀 BIM PORTAL DOMAIN MODEL EXPORT EXAMPLES")
     print("=" * 70)
     
     if not check_credentials():
@@ -213,16 +214,16 @@ def main():
             base_url=BIMPortalConfig.BASE_URL
         )
         
-        # Run LOIN export examples
-        run_loin_export_examples(client)
+        # Run domain model export examples
+        run_domain_model_export_examples(client)
         
         print("\n" + "=" * 70)
-        print("✅ LOIN EXPORT EXAMPLES COMPLETE!")
+        print("✅ DOMAIN MODEL EXPORT EXAMPLES COMPLETE!")
         print("=" * 70)
         print(f"📂 Check the '{BIMPortalConfig.EXPORT_DIRECTORY}' directory for exported files")
         
     except Exception as e:
-        logger.error(f"Error running LOIN export examples: {e}")
+        logger.error(f"Error running domain model export examples: {e}")
         print(f"❌ Error running examples: {e}")
 
 

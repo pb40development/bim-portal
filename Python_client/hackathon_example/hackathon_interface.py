@@ -26,10 +26,10 @@ from pathlib import Path
 from typing import List, Optional, Dict, Any
 from uuid import UUID
 
-from auth.auth_service_impl import AuthService
-from enhanced_bim_client import EnhancedBimPortalClient
-from config import BIMPortalConfig 
-from models import (
+from client.auth.auth_service_impl import AuthService
+from client.enhanced_bim_client import EnhancedBimPortalClient
+from client.config import BIMPortalConfig
+from client.models import (
     SimpleAiaProjectPublicDto,
     AIAProjectPublicDto, 
     PropertyOrGroupForPublicDto,

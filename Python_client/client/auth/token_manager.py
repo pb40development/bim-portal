@@ -4,7 +4,7 @@ from typing import Optional, Union, Dict, Any
 import jwt
 
 # Import from your new Pydantic models instead of generated client
-from models import JWTTokenPublicDto
+from client.models import JWTTokenPublicDto
 from .auth_config import TOKEN_REFRESH_MARGIN, logger
 
 class TokenManager:

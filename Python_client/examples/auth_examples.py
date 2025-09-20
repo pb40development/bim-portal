@@ -1,20 +1,16 @@
 import os
 import logging
 import threading
-import time
-from http import HTTPStatus
-from typing import Optional
 from uuid import UUID
 
 from dotenv import load_dotenv
-from auth.auth_service_impl import AuthService
-from enhanced_bim_client import EnhancedBimPortalClient
-from auth.auth_config import BIM_PORTAL_USERNAME_ENV_VAR, BIM_PORTAL_PASSWORD_ENV_VAR
-from models import LoinForPublicRequest
+from client.auth.auth_service_impl import AuthService
+from client.enhanced_bim_client import EnhancedBimPortalClient
+from client.auth.auth_config import BIM_PORTAL_USERNAME_ENV_VAR, BIM_PORTAL_PASSWORD_ENV_VAR
 
 # --- Configuration ---
 load_dotenv()
-from config import BIMPortalConfig
+from client.config import BIMPortalConfig
 BASE_URL = BIMPortalConfig.BASE_URL
 PRIVATE_LOIN_GUID = BIMPortalConfig.PRIVATE_LOIN_GUID
 PUBLIC_LOIN_GUID = BIMPortalConfig.PUBLIC_LOIN_GUID

@@ -4,8 +4,8 @@ AIA-related functionality mixin (LOINs, Projects, Templates, Domain Models, Cont
 
 from typing import List, Optional
 from uuid import UUID
-from auth.auth_config import logger
-from models import (
+from .auth.auth_config import logger
+from .models import (
     SimpleLoinPublicDto, LoinForPublicRequest, LOINPublicDto,
     SimpleAiaProjectPublicDto, AiaProjectForPublicRequest, AIAProjectPublicDto,
     SimpleDomainSpecificModelPublicDto, AiaDomainSpecificModelForPublicRequest, 
