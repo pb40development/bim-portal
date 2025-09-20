@@ -8,7 +8,7 @@ Quick access to the German BIM Portal API for hackathons and rapid prototyping.
 git clone https://github.com/pb40development/bim-portal
 cd bim-portal/Python_client
 ```
-This project requires Python 3.12 or higher. All exports will be saved to the exports/ directory.
+This project requires Python 3.10 or higher. All exports will be saved to the exports/ directory.
 
 <details>
 <summary>🐍 <strong>Virtual Environment Setup (Recommended)</strong></summary>
@@ -18,10 +18,10 @@ This project requires Python 3.12 or higher. All exports will be saved to the ex
 **Linux/macOS:**
 ```bash
 # Create a virtual environment
-python3 -m venv .venv
+python3 -m venv .myvenv
 
 # Activate it
-source .venv/bin/activate
+source .myvenv/bin/activate
 
 # Install the package in development mode
 pip install -e .
@@ -30,10 +30,10 @@ pip install -e .
 **Windows:**
 ```powershell
 # Create a virtual environment
-python -m venv .venv
+python -m venv .myvenv
 
 # Activate it
-.venv\Scripts\Activate.ps1
+.myvenv\Scripts\Activate.ps1
 
 # Install the package in development mode
 pip install -e .
@@ -89,17 +89,17 @@ cp env.example .env
 ### 2. Run Example
 
 **Method 1: IDE (Recommended for Development)**
-- Open `hackathon_example/hackathon_example.py` in your IDE
+- Open `hackathon_example/main_example.py` in your IDE
 - Click the "Run" (or debug) button
 
 **Method 2: Command Line (Recommended for Consistency)**
 ```bash
-python -m hackathon_example.hackathon_example
+python -m hackathon_example.main_example
 ```
 
 ## 💡 Hackathon Code Template
 
-Edit `hackathon_example/hackathon_example.py` and add your code to the `run_hackathon_code()` function:
+Edit `hackathon_example/main_example.py` and add your code to the `run_hackathon_code()` function:
 
 ```python
 def run_hackathon_code(client):
@@ -179,4 +179,4 @@ bim-portal-client/
 **Need BIM Portal access?** Visit: https://via.bund.de/bmdv/bim-portal/edu/bim
 
 ---
-**Ready to hack!** 🚀 Edit `hackathon_example/hackathon_example.py` and start building!
+**Ready to hack!** 🚀 Edit `hackathon_example/main_example.py` and start building!

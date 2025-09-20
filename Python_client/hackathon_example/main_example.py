@@ -9,7 +9,7 @@ try:
     from .setup_hackathon import setup_bim_portal
     from .loin_example import loin_ids_export_example
 except ImportError:
-    # When run directly (IDE, python hackathon_example.py)
+    # When run directly (IDE, python main_example.py)
     from setup_hackathon import setup_bim_portal
     from loin_example import loin_ids_export_example
 
