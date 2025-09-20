@@ -2,13 +2,21 @@
 
 Quick access to the German BIM Portal API for hackathons and rapid prototyping.
 
-## Setup
+## 🚀 Quick Installation
 
-This project requires Python 3.12 or higher. All exports will be saved to the `exports/` directory.
+**Recommended approach:**
+```bash
+# Clone and install in development mode
+git clone https://github.com/pb40development/bim-portal
+cd bim-portal/Python_client
+```
 
-### Recommended: `venv` and `pip`
+This project requires Python 3.12 or higher. All exports will be saved to the exports/ directory.
 
-This is the standard, lightweight way to set up a Python project.
+<details>
+<summary>🐍 <strong>Virtual Environment Setup (Recommended)</strong></summary>
+
+### Using `venv` (Standard Python)
 
 **Linux/macOS:**
 ```bash
@@ -18,8 +26,8 @@ python3 -m venv .venv
 # Activate it
 source .venv/bin/activate
 
-# Install dependencies
-pip install -r requirements.txt
+# Install the package in development mode
+pip install -e .
 ```
 
 **Windows:**
@@ -30,11 +38,26 @@ python -m venv .venv
 # Activate it
 .venv\Scripts\Activate.ps1
 
-# Install dependencies
+# Install the package in development mode
+pip install -e .
+```
+
+### Using `pip` with requirements.txt insteaad of `pip install -e .`
+```bash
+# Alternative: Install from requirements file
 pip install -r requirements.txt
 ```
 
-### Alternative: `conda`
+**Why `pip install -e .` is better:**
+- ✅ **Edit and test immediately**: Changes to your code work instantly without reinstalling.
+- ✅ **Proper package structure**: Your code becomes a proper Python package you can import anywhere.
+- ✅ **No path issues**: Import `from hackathon_example import main` works from any directory.
+- ❌ **requirements.txt**: Only installs dependencies, you might get import errors for your own code if you are not doing proper imports.
+
+</details>
+
+<details>
+<summary>🐍 <strong>Alternative: Conda Environment</strong></summary>
 
 If you prefer using Conda, you can use the provided `environment.yml` file.
 
@@ -45,7 +68,14 @@ conda env create -f environment.yml
 
 # Activate the environment
 conda activate bim-portal-hackathon
+
+# Install the package in development mode
+pip install -e .
 ```
+</details>
+
+
+
 
 ## 🚀 Quick Start
 ### 0. Create and account in the BIM Portal website (EDU environment)
