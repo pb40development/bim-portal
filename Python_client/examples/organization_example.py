@@ -229,11 +229,11 @@ def analyze_jwt_token_structure(token: str):
                 # Look for common user ID claims
                 print("   🔍 Checking for user ID claims:")
                 check_for_claim(payload_json, "sub")
-                check_for_claim(payload_json, "userId")
-                check_for_claim(payload_json, "user_id")
-                check_for_claim(payload_json, "id")
+                # check_for_claim(payload_json, "userId")
+                # check_for_claim(payload_json, "user_id")
+                # check_for_claim(payload_json, "id")
                 check_for_claim(payload_json, "email")
-                check_for_claim(payload_json, "username")
+                # check_for_claim(payload_json, "username")
                 
             except Exception as decode_error:
                 print(f"   ❌ Failed to decode payload: {decode_error}")
@@ -263,19 +263,11 @@ def main():
     print("🔧 Setting up client...")
     
     try:
-        if has_credentials:
-            auth_service = AuthService(guid=BIMPortalConfig.PRIVATE_RESOURCE_GUID)
-            client = EnhancedBimPortalClient(
-                auth_service=auth_service,
-                base_url=BIMPortalConfig.BASE_URL
-            )
-        else:
-            # Create client without auth for public endpoints
-            auth_service = AuthService(guid=BIMPortalConfig.PUBLIC_RESOURCE_GUID)
-            client = EnhancedBimPortalClient(
-                auth_service=auth_service,
-                base_url=BIMPortalConfig.BASE_URL
-            )
+        auth_service = AuthService()
+        client = EnhancedBimPortalClient(
+            auth_service=auth_service,
+            base_url=BIMPortalConfig.BASE_URL
+        )
         
         # Run organization examples
         run_organization_examples(client)

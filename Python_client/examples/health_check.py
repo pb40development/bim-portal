@@ -19,7 +19,7 @@ def test_api_connectivity():
     """Test basic API connectivity without authentication."""
     print("Step 1: Testing basic API connectivity...")
     try:
-        auth_service = AuthService(guid=PUBLIC_RESOURCE_GUID, username=None, password=None)
+        auth_service = AuthService(username=None, password=None)
         client = EnhancedBimPortalClient(auth_service=auth_service, base_url=BASE_URL)
         
         # Try to search for public projects
@@ -46,7 +46,7 @@ def test_authentication():
     print("   Credentials found in .env file")
     
     try:
-        auth_service = AuthService(guid=PRIVATE_RESOURCE_GUID)
+        auth_service = AuthService()
         client = EnhancedBimPortalClient(auth_service=auth_service, base_url=BASE_URL)
         print("   Client setup complete")
         
@@ -161,7 +161,7 @@ def main():
         return
     
     # Set up authenticated client for remaining tests
-    auth_service = AuthService(guid=PRIVATE_RESOURCE_GUID)
+    auth_service = AuthService()
     client = EnhancedBimPortalClient(auth_service=auth_service, base_url=BASE_URL)
     
     # Test 3: API features

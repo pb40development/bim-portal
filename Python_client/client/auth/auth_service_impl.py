@@ -26,24 +26,19 @@ class AuthenticationError(Exception):
 class AuthService:
     """
     Handles the authentication process, including login and token refreshing.
-    Adapted to work with Pydantic models.
+    Adapted to work with Pydantic models without requiring GUID.
     """
 
-    def __init__(self, guid: str, username: Optional[str] = None, password: Optional[str] = None):
+    def __init__(self, username: Optional[str] = None, password: Optional[str] = None):
         """
         Initializes the AuthService.
 
         Args:
-            guid (str): The GUID required for authentication headers.
             username (str, optional): The user's email. Defaults to env var.
             password (str, optional): The user's password. Defaults to env var.
         """
         self.username = username or os.getenv(BIM_PORTAL_USERNAME_ENV_VAR)
         self.password = password or os.getenv(BIM_PORTAL_PASSWORD_ENV_VAR)
-        self.guid = guid
-
-        if not self.guid:
-            raise ValueError("A GUID must be provided for authentication.")
 
         self._token_manager = TokenManager()
         self._lock = threading.Lock()
@@ -71,17 +66,16 @@ class AuthService:
                 return self._token_manager.get_access_token()
 
             logger.error("Could not obtain a valid token after login attempt.")
-            raise AuthenticationError("Failed to authenticate. Please check credentials and GUID.")
+            raise AuthenticationError("Failed to authenticate. Please check credentials.")
 
     def _login(self) -> bool:
         """
         Performs a login to get new access and refresh tokens.
         """
-        logger.debug(f"Attempting login for user '{self.username}' with GUID '{self.guid}'")
+        logger.debug(f"Attempting login for user '{self.username}'")
         headers = {
             "accept": "application/json",
             "Content-Type": "application/json",
-            "GUID": self.guid,
         }
         login_data = UserLoginPublicDto(mail=self.username, password=self.password)
 

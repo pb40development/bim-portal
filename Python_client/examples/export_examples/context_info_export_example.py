@@ -159,7 +159,7 @@ def main():
     print("🔧 Setting up authenticated client...")
     
     try:
-        auth_service = AuthService(guid=BIMPortalConfig.PRIVATE_RESOURCE_GUID)
+        auth_service = AuthService()
         client = EnhancedBimPortalClient(
             auth_service=auth_service, 
             base_url=BIMPortalConfig.BASE_URL

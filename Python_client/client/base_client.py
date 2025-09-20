@@ -17,11 +17,28 @@ from .config import BIMPortalConfig
 class BaseClient:
     """
     Base HTTP client with authentication and common functionality.
+    No GUID required for authentication.
     """
-    
-    def __init__(self, auth_service: AuthService, base_url: str = BIMPortalConfig.BASE_URL, 
-                 raise_on_unexpected_status: bool = False):
-        self.auth_service = auth_service
+
+    def __init__(self, auth_service: Optional[AuthService] = None, base_url: str = BIMPortalConfig.BASE_URL,
+                 raise_on_unexpected_status: bool = False, username: Optional[str] = None,
+                 password: Optional[str] = None):
+        """
+        Initialize the base client.
+
+        Args:
+            auth_service: Pre-configured AuthService instance (optional)
+            base_url: API base URL
+            raise_on_unexpected_status: Whether to raise exceptions on HTTP errors
+            username: Username for authentication (if auth_service not provided)
+            password: Password for authentication (if auth_service not provided)
+        """
+        if auth_service:
+            self.auth_service = auth_service
+        else:
+            # Create auth service without GUID requirement
+            self.auth_service = AuthService(username=username, password=password)
+
         self.base_url = base_url
         self.raise_on_unexpected_status = raise_on_unexpected_status
         
