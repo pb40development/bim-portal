@@ -99,6 +99,17 @@ class TokenManager:
                 logger.debug(f"Token is expiring. Expiration: {self._expires_at}, Now: {now}")
             return is_expiring
 
+    def invalidate_access_token(self) -> None:
+        """
+        Invalidates only the access token while keeping the refresh token.
+        This allows the system to refresh the token instead of requiring a fresh login.
+        """
+        with self._lock:
+            logger.debug("Invalidating access token (keeping refresh token for refresh).")
+            self._access_token = None
+            # Set expiry to past to trigger refresh on next get_valid_token() call
+            self._expires_at = datetime.now(timezone.utc) - TOKEN_REFRESH_MARGIN
+
     def clear_tokens(self) -> None:
         """Clears all stored token data."""
         with self._lock:

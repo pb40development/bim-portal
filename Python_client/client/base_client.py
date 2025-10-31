@@ -83,8 +83,9 @@ class BaseClient:
                         if self.raise_on_unexpected_status:
                             response.raise_for_status()
                         return response
-                    
-                    self.auth_service._token_manager.clear_tokens()
+
+                    # Invalidate access token but keep refresh token for token refresh
+                    self.auth_service._token_manager.invalidate_access_token()
                     continue
                 
                 if self.raise_on_unexpected_status and response.status_code >= 400:

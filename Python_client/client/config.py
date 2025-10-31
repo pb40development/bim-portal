@@ -31,7 +31,7 @@ class BIMPortalConfig:
     
     # Authentication endpoints (relative to BASE_URL)
     LOGIN_ENDPOINT: str = "/infrastruktur/api/v1/public/auth/login"
-    REFRESH_ENDPOINT: str = "/infrastruktur/api/v1/public/auth/refresh-token"
+    REFRESH_ENDPOINT: str = "/infrastruktur/api/v1/public/auth/refresh"
 
     # --- Default GUIDs ---
     # DEFAULT_AUTH_GUID: str = "4559818c-faea-4bb7-bbdd-e6470df8261b"
@@ -50,7 +50,7 @@ class BIMPortalConfig:
     VERIFY_SSL: bool = os.getenv("VERIFY_SSL", "true").lower() == "true"
 
     # --- Application Configuration ---
-    LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO").upper()
+    LOG_LEVEL: str = os.getenv("LOG_LEVEL", "DEBUG").upper()
     EXPORT_DIRECTORY: str = os.getenv("EXPORT_DIRECTORY", "../exports")
     MAX_RETRIES: int = int(os.getenv("MAX_RETRIES", "3"))
 

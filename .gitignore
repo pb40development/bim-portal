@@ -48,3 +48,5 @@ Thumbs.db
 /Python_client/exports/*
 !/Python_client/exports/.gitkeep
 /Python_client/.venv/
+/Python_client/.myvenv/
+

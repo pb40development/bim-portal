@@ -152,7 +152,7 @@ class AuthService:
             logger.debug("No refresh token available. Cannot refresh.")
             raise TokenExpiredError("No refresh token available")
 
-        logger.debug("Attempting to refresh token.")
+        logger.debug(f"Attempting to refresh token using endpoint: {REFRESH_URL}")
         headers = {"accept": "application/json", "Content-Type": "application/json"}
         refresh_data = RefreshTokenRequestDTO(refreshToken=refresh_token)
 
