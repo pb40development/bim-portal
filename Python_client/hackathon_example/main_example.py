@@ -8,10 +8,12 @@ try:
     # When run as part of package (python -m hackathon_example)
     from .setup_hackathon import setup_bim_portal
     from .loin_example import loin_ids_export_example
+    from .xml_batch_export import export_loins_xml_batch
 except ImportError:
     # When run directly (IDE, python main_example.py)
     from setup_hackathon import setup_bim_portal
     from loin_example import loin_ids_export_example
+    from xml_batch_export import export_loins_xml_batch
 
 
 def run_hackathon_code(client):
@@ -26,21 +28,10 @@ def run_hackathon_code(client):
     print("=" * 50)
 
     try:
-        # Example hackathon code - participants replace this:
-        projects = client.search_projects()
-        print(f"📊 Found {len(projects)} projects")
+        # Batch XML export of first 10 LOINs from guids_ohne_Doppelten.txt
+        export_loins_xml_batch(client, count=6193)
 
-        if projects:
-            print("🏗️ First 3 projects:")
-            for i, project in enumerate(projects[:3], 1):
-                print(f"   {i}. {project.name}")
-
-        # Add more hackathon code here:
-        # loins = client.search_loins()
-        # properties = client.search_properties()
-        # etc.
-
-        print("✅ Hackathon code completed successfully!")
+        print("\n✅ Hackathon code completed successfully!")
 
     except Exception as e:
         print(f"❌ Error in hackathon code: {e}")
@@ -70,7 +61,7 @@ def main():
 
     # Run the example to show how it works
     print("\n📚 Running example to show you how it works...")
-    loin_ids_export_example(client)
+    #loin_ids_export_example(client)
 
     # Run hackathon code
     run_hackathon_code(client)
